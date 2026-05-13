@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-const LEVELS = [
+const SKILL_LEVELS = [
+  "Nevyplnené",
   "Úplný začiatočník",
   "Začiatočník",
   "Stredne pokročilý",
@@ -10,131 +11,147 @@ const LEVELS = [
   "Expert"
 ];
 
-const SKILL_GROUPS = [
-  {
-    title: "Project Management",
-    skills: [
-      "Project planning",
-      "Roadmap planning",
-      "Risk management",
-      "Budgeting",
-      "Reporting",
-      "Stakeholder management",
-      "Prioritization",
-      "Project documentation",
-      "Project coordination",
-      "Resource planning"
-    ]
-  },
-  {
-    title: "Agile / Methods",
-    skills: [
-      "Agile",
-      "Scrum",
-      "Kanban",
-      "Sprint planning",
-      "Retrospectives",
-      "Backlog management",
-      "Waterfall",
-      "Change management",
-      "Process improvement",
-      "Project governance"
-    ]
-  },
-  {
-    title: "Tools",
-    skills: [
-      "Jira",
-      "Confluence",
-      "MS Project",
-      "Asana",
-      "Trello",
-      "Notion",
-      "MS Excel",
-      "Power BI",
-      "Slack",
-      "Microsoft Teams"
-    ]
-  },
-  {
-    title: "Soft skills",
-    skills: [
-      "Communication",
-      "Leadership",
-      "Teamwork",
-      "Problem solving",
-      "Time management",
-      "Negotiation",
-      "Presentation skills",
-      "Conflict resolution",
-      "Decision making",
-      "Critical thinking"
-    ]
-  },
-  {
-    title: "Business skills",
-    skills: [
-      "Business analysis",
-      "KPI tracking",
-      "Vendor management",
-      "Customer orientation",
-      "Strategic thinking",
-      "Financial awareness",
-      "Data-driven decision making",
-      "Requirements gathering",
-      "Documentation",
-      "Quality management"
-    ]
-  },
-  {
-    title: "Languages",
-    skills: [
-      "English B1",
-      "English B2",
-      "English C1",
-      "Czech",
-      "Slovak",
-      "German A2",
-      "German B1",
-      "German B2"
-    ]
-  }
+const LANGUAGE_LEVELS = [
+  "Neovládam",
+  "A1",
+  "A2",
+  "B1",
+  "B2",
+  "C1/C2"
 ];
 
-function createInitialSkills() {
+const QUESTIONS = [
+  { type: "skill", group: "Project Management", skill: "Project planning" },
+  { type: "skill", group: "Project Management", skill: "Roadmap planning" },
+  { type: "skill", group: "Project Management", skill: "Risk management" },
+  { type: "skill", group: "Project Management", skill: "Budgeting" },
+  { type: "skill", group: "Project Management", skill: "Reporting" },
+  { type: "skill", group: "Project Management", skill: "Stakeholder management" },
+  { type: "skill", group: "Project Management", skill: "Prioritization" },
+  { type: "skill", group: "Project Management", skill: "Project documentation" },
+  { type: "skill", group: "Project Management", skill: "Project coordination" },
+  { type: "skill", group: "Project Management", skill: "Resource planning" },
+  { type: "skill", group: "Project Management", skill: "Timeline management" },
+  { type: "skill", group: "Project Management", skill: "Scope management" },
+  { type: "skill", group: "Project Management", skill: "Meeting facilitation" },
+  { type: "skill", group: "Project Management", skill: "Project governance" },
+
+  { type: "skill", group: "Agile / Methods", skill: "Agile" },
+  { type: "skill", group: "Agile / Methods", skill: "Scrum" },
+  { type: "skill", group: "Agile / Methods", skill: "Kanban" },
+  { type: "skill", group: "Agile / Methods", skill: "Sprint planning" },
+  { type: "skill", group: "Agile / Methods", skill: "Retrospectives" },
+  { type: "skill", group: "Agile / Methods", skill: "Backlog management" },
+  { type: "skill", group: "Agile / Methods", skill: "Waterfall" },
+  { type: "skill", group: "Agile / Methods", skill: "Change management" },
+  { type: "skill", group: "Agile / Methods", skill: "Process improvement" },
+  { type: "skill", group: "Agile / Methods", skill: "Requirements gathering" },
+
+  { type: "skill", group: "Tools", skill: "Jira" },
+  { type: "skill", group: "Tools", skill: "Confluence" },
+  { type: "skill", group: "Tools", skill: "MS Project" },
+  { type: "skill", group: "Tools", skill: "Asana" },
+  { type: "skill", group: "Tools", skill: "Trello" },
+  { type: "skill", group: "Tools", skill: "Notion" },
+  { type: "skill", group: "Tools", skill: "MS Excel" },
+  { type: "skill", group: "Tools", skill: "Power BI" },
+  { type: "skill", group: "Tools", skill: "Slack" },
+  { type: "skill", group: "Tools", skill: "Microsoft Teams" },
+  { type: "skill", group: "Tools", skill: "Google Workspace" },
+  { type: "skill", group: "Tools", skill: "Miro" },
+  { type: "skill", group: "Tools", skill: "Figma" },
+  { type: "skill", group: "Tools", skill: "CRM" },
+
+  { type: "skill", group: "Soft skills", skill: "Communication" },
+  { type: "skill", group: "Soft skills", skill: "Leadership" },
+  { type: "skill", group: "Soft skills", skill: "Teamwork" },
+  { type: "skill", group: "Soft skills", skill: "Problem solving" },
+  { type: "skill", group: "Soft skills", skill: "Time management" },
+  { type: "skill", group: "Soft skills", skill: "Negotiation" },
+  { type: "skill", group: "Soft skills", skill: "Presentation skills" },
+  { type: "skill", group: "Soft skills", skill: "Conflict resolution" },
+  { type: "skill", group: "Soft skills", skill: "Decision making" },
+  { type: "skill", group: "Soft skills", skill: "Critical thinking" },
+  { type: "skill", group: "Soft skills", skill: "Adaptability" },
+  { type: "skill", group: "Soft skills", skill: "Ownership" },
+  { type: "skill", group: "Soft skills", skill: "Empathy" },
+  { type: "skill", group: "Soft skills", skill: "Stress management" },
+
+  { type: "skill", group: "Business skills", skill: "Business analysis" },
+  { type: "skill", group: "Business skills", skill: "KPI tracking" },
+  { type: "skill", group: "Business skills", skill: "Vendor management" },
+  { type: "skill", group: "Business skills", skill: "Customer orientation" },
+  { type: "skill", group: "Business skills", skill: "Strategic thinking" },
+  { type: "skill", group: "Business skills", skill: "Financial awareness" },
+  { type: "skill", group: "Business skills", skill: "Data-driven decision making" },
+  { type: "skill", group: "Business skills", skill: "Documentation" },
+  { type: "skill", group: "Business skills", skill: "Quality management" },
+  { type: "skill", group: "Business skills", skill: "Process mapping" },
+
+  { type: "language", group: "Languages", skill: "English" },
+  { type: "language", group: "Languages", skill: "Czech" },
+  { type: "language", group: "Languages", skill: "Slovak" },
+  { type: "language", group: "Languages", skill: "German" },
+  { type: "language", group: "Languages", skill: "Polish" },
+  { type: "language", group: "Languages", skill: "French" }
+];
+
+function createInitialAnswers() {
   const result = {};
-  SKILL_GROUPS.forEach((group) => {
-    group.skills.forEach((skill) => {
-      result[skill] = "";
-    });
+  QUESTIONS.forEach((question) => {
+    result[question.skill] = 0;
   });
   return result;
 }
 
+function getLevelLabel(question, value) {
+  if (question.type === "language") return LANGUAGE_LEVELS[value];
+  return SKILL_LEVELS[value];
+}
+
 export default function Home() {
-  const [skills, setSkills] = useState(createInitialSkills());
+  const [answers, setAnswers] = useState(createInitialAnswers());
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [jobUrl, setJobUrl] = useState("");
   const [jobText, setJobText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
-  function updateSkill(skill, level) {
-    setSkills((previous) => ({
+  const currentQuestion = QUESTIONS[currentIndex];
+  const progress = Math.round(((currentIndex + 1) / QUESTIONS.length) * 100);
+
+  const answeredCount = useMemo(() => {
+    return Object.values(answers).filter((value) => value > 0).length;
+  }, [answers]);
+
+  function updateAnswer(value) {
+    setAnswers((previous) => ({
       ...previous,
-      [skill]: level
+      [currentQuestion.skill]: Number(value)
     }));
+  }
+
+  function goPrevious() {
+    setCurrentIndex((index) => Math.max(0, index - 1));
+  }
+
+  function goNext() {
+    setCurrentIndex((index) => Math.min(QUESTIONS.length - 1, index + 1));
   }
 
   async function handleAnalyze() {
     setLoading(true);
     setResult(null);
 
-    const selectedSkills = Object.entries(skills)
-      .filter(([, level]) => level)
-      .map(([skill, level]) => ({
-        skill,
-        level
-      }));
+    const selectedSkills = QUESTIONS
+      .map((question) => ({
+        skill: question.skill,
+        group: question.group,
+        type: question.type,
+        levelIndex: answers[question.skill],
+        level: getLevelLabel(question, answers[question.skill])
+      }))
+      .filter((item) => item.levelIndex > 0);
 
     if (selectedSkills.length < 5) {
       alert("Vyplň aspoň 5 skills, inak analýza nebude mať zmysel.");
@@ -181,45 +198,72 @@ export default function Home() {
     <>
       <main className="page">
         <section className="hero">
-          <div className="badge">AI skill checker pre projektových manažérov</div>
+          <div className="badge">Skill checker bez plateného AI API</div>
           <h1>Skills Heatmap</h1>
           <p>
-            Vyplň svoj skill profil na 5-stupňovej škále, vlož pracovnú ponuku
-            a zisti, ako dobre sa hodíš na konkrétnu pozíciu.
+            Vyplň svoj skill profil cez jednoduchý dotazník, vlož pracovnú
+            ponuku a aplikácia porovná tvoju úroveň s požiadavkami pozície.
           </p>
         </section>
 
         <section className="card intro">
-          <h2>1. Vyplň svoj skill profil</h2>
+          <h2>1. Skill dotazník</h2>
           <p>
-            Pri každom skille vyber svoju reálnu úroveň. Neprikrášľuj to.
-            Výsledok bude použiteľný len vtedy, keď vstup nebude sebaklam.
+            Zobrazujeme vždy jeden skill. Hodnoť reálne. Ak si dáš všade expert,
+            výsledok nebude mať hodnotu.
           </p>
+          <div className="progressMeta">
+            <span>Otázka {currentIndex + 1} / {QUESTIONS.length}</span>
+            <span>Vyplnené skills: {answeredCount}</span>
+          </div>
+          <div className="progressBar">
+            <div style={{ width: `${progress}%` }} />
+          </div>
         </section>
 
-        <section className="skillsWrapper">
-          {SKILL_GROUPS.map((group) => (
-            <div className="skillGroup" key={group.title}>
-              <h3>{group.title}</h3>
+        <section className="questionCard">
+          <div className="questionTop">
+            <span>{currentQuestion.group}</span>
+            <strong>{progress}%</strong>
+          </div>
 
-              {group.skills.map((skill) => (
-                <div className="skillRow" key={skill}>
-                  <label>{skill}</label>
-                  <select
-                    value={skills[skill]}
-                    onChange={(event) => updateSkill(skill, event.target.value)}
-                  >
-                    <option value="">Nevyplnené</option>
-                    {LEVELS.map((level) => (
-                      <option value={level} key={level}>
-                        {level}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+          <div className="questionAnimated" key={currentQuestion.skill}>
+            <h2>{currentQuestion.skill}</h2>
+            <p>
+              {currentQuestion.type === "language"
+                ? "Označ svoju jazykovú úroveň na škále."
+                : "Označ svoju aktuálnu úroveň v tejto oblasti."}
+            </p>
+
+            <div className="sliderValue">
+              {getLevelLabel(currentQuestion, answers[currentQuestion.skill])}
+            </div>
+
+            <input
+              className="range"
+              type="range"
+              min="0"
+              max="5"
+              step="1"
+              value={answers[currentQuestion.skill]}
+              onChange={(event) => updateAnswer(event.target.value)}
+            />
+
+            <div className="scaleLabels">
+              {(currentQuestion.type === "language" ? LANGUAGE_LEVELS : SKILL_LEVELS).map((label) => (
+                <span key={label}>{label}</span>
               ))}
             </div>
-          ))}
+          </div>
+
+          <div className="navigation">
+            <button className="secondary" onClick={goPrevious} disabled={currentIndex === 0}>
+              ← Späť
+            </button>
+            <button onClick={goNext} disabled={currentIndex === QUESTIONS.length - 1}>
+              Ďalej →
+            </button>
+          </div>
         </section>
 
         <section className="card">
@@ -238,7 +282,7 @@ export default function Home() {
           <div className="formBlock">
             <label>Text pracovnej ponuky</label>
             <textarea
-              placeholder="Odporúčané pre testovanie: vlož sem text pracovnej ponuky. Linky z Jobs.cz môžu byť technicky blokované."
+              placeholder="Odporúčané pre istý výsledok: vlož sem text pracovnej ponuky. Linky z Jobs.cz môžu byť blokované."
               value={jobText}
               onChange={(event) => setJobText(event.target.value)}
             />
@@ -259,7 +303,7 @@ export default function Home() {
 
             <div className="grid">
               <div className="resultBox">
-                <h3>Silné stránky</h3>
+                <h3>Silné zhody</h3>
                 {result.matchedSkills?.map((skill) => (
                   <span className="pill good" key={skill}>{skill}</span>
                 ))}
@@ -342,6 +386,7 @@ export default function Home() {
         }
 
         .card,
+        .questionCard,
         .results {
           background: white;
           border-radius: 28px;
@@ -353,65 +398,125 @@ export default function Home() {
         .intro p {
           color: #4b5563;
           line-height: 1.6;
-          margin-bottom: 0;
         }
 
-        .skillsWrapper {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 22px;
-          margin-bottom: 28px;
-        }
-
-        .skillGroup {
-          background: white;
-          border-radius: 28px;
-          padding: 26px;
-          box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-        }
-
-        .skillGroup h3 {
-          margin-top: 0;
-          margin-bottom: 18px;
-        }
-
-        .skillRow {
-          display: grid;
-          grid-template-columns: 1fr 230px;
-          gap: 14px;
-          align-items: center;
-          padding: 10px 0;
-          border-bottom: 1px solid #f3f4f6;
-        }
-
-        .skillRow:last-child {
-          border-bottom: 0;
-        }
-
-        label {
-          display: block;
+        .progressMeta {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
           font-weight: 800;
+          color: #4b5563;
+          margin-top: 18px;
         }
 
-        .skillRow label {
-          font-size: 14px;
+        .progressBar {
+          height: 12px;
+          background: #e5e7eb;
+          border-radius: 999px;
+          overflow: hidden;
+          margin-top: 12px;
+        }
+
+        .progressBar div {
+          height: 100%;
+          background: #111827;
+          border-radius: 999px;
+          transition: width 0.3s ease;
+        }
+
+        .questionTop {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          color: #6b7280;
+          font-weight: 800;
+          margin-bottom: 24px;
+        }
+
+        .questionAnimated {
+          animation: slideIn 0.22s ease;
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .questionAnimated h2 {
+          font-size: 44px;
+          margin: 0 0 10px;
+        }
+
+        .questionAnimated p {
+          color: #4b5563;
+          font-size: 17px;
+          line-height: 1.6;
+        }
+
+        .sliderValue {
+          margin: 28px 0 18px;
+          background: #111827;
+          color: white;
+          display: inline-block;
+          padding: 13px 18px;
+          border-radius: 999px;
+          font-weight: 900;
+        }
+
+        .range {
+          width: 100%;
+          accent-color: #111827;
+        }
+
+        .scaleLabels {
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 8px;
+          margin-top: 12px;
+          color: #6b7280;
+          font-size: 12px;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        .navigation {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-top: 30px;
+        }
+
+        .secondary {
+          background: #e5e7eb;
+          color: #111827;
+        }
+
+        .secondary:hover {
+          background: #d1d5db;
         }
 
         .formBlock {
           margin-bottom: 22px;
         }
 
-        .formBlock label {
+        label {
+          display: block;
+          font-weight: 800;
           margin-bottom: 10px;
         }
 
         input,
-        textarea,
-        select {
+        textarea {
           width: 100%;
           border: 1px solid #d1d5db;
           border-radius: 16px;
-          padding: 13px 14px;
+          padding: 15px 16px;
           font-size: 15px;
           outline: none;
           background: white;
@@ -423,8 +528,7 @@ export default function Home() {
         }
 
         input:focus,
-        textarea:focus,
-        select:focus {
+        textarea:focus {
           border-color: #111827;
         }
 
@@ -538,13 +642,17 @@ export default function Home() {
             font-size: 42px;
           }
 
-          .skillsWrapper,
-          .grid {
+          .questionAnimated h2 {
+            font-size: 34px;
+          }
+
+          .grid,
+          .navigation {
             grid-template-columns: 1fr;
           }
 
-          .skillRow {
-            grid-template-columns: 1fr;
+          .scaleLabels {
+            font-size: 10px;
           }
         }
       `}</style>
