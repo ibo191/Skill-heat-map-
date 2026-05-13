@@ -2,79 +2,440 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const SKILL_KEYWORDS = {
-  "Project planning": ["project planning", "planning", "plánování projektu", "projektové plánování"],
-  "Roadmap planning": ["roadmap", "roadmap planning", "produktová roadmapa", "plánování roadmapy"],
-  "Risk management": ["risk", "risk management", "řízení rizik", "rizika"],
-  "Budgeting": ["budget", "budgeting", "rozpočet", "budget management"],
-  "Reporting": ["reporting", "report", "reporty", "příprava reportingu"],
-  "Stakeholder management": ["stakeholder", "stakeholders", "stakeholder management"],
-  "Prioritization": ["prioritization", "prioritizace", "priority", "prioritizovat"],
-  "Project documentation": ["documentation", "dokumentace", "project documentation"],
-  "Project coordination": ["coordination", "koordinace", "project coordination"],
-  "Resource planning": ["resource planning", "kapacity", "resources", "plánování kapacit"],
-  "Timeline management": ["timeline", "harmonogram", "deadlines", "termíny"],
-  "Scope management": ["scope", "rozsah projektu", "scope management"],
-  "Meeting facilitation": ["meeting", "facilitation", "workshop", "meetingy"],
-  "Project governance": ["governance", "projektová governance"],
+  "Project planning": [
+    "project planning",
+    "planning",
+    "project plan",
+    "plánování projektu",
+    "projektové plánování",
+    "projektový plán",
+    "plán projektu"
+  ],
+  "Roadmap planning": [
+    "roadmap",
+    "roadmap planning",
+    "product roadmap",
+    "projektová roadmapa",
+    "produktová roadmapa",
+    "plánování roadmapy"
+  ],
+  "Risk management": [
+    "risk",
+    "risk management",
+    "risk assessment",
+    "řízení rizik",
+    "rizika",
+    "analýza rizik"
+  ],
+  "Budgeting": [
+    "budget",
+    "budgeting",
+    "cost control",
+    "budget management",
+    "rozpočet",
+    "rozpočtování",
+    "náklady"
+  ],
+  "Reporting": [
+    "reporting",
+    "report",
+    "status report",
+    "reporty",
+    "reporting projektů",
+    "příprava reportingu",
+    "stav projektu"
+  ],
+  "Stakeholder management": [
+    "stakeholder",
+    "stakeholders",
+    "stakeholder management",
+    "communication with stakeholders",
+    "komunikace se stakeholdery",
+    "práce se stakeholdery",
+    "zainteresované strany"
+  ],
+  "Prioritization": [
+    "prioritization",
+    "prioritisation",
+    "priority",
+    "priorities",
+    "prioritizace",
+    "priority",
+    "prioritizovat"
+  ],
+  "Project documentation": [
+    "project documentation",
+    "documentation",
+    "dokumentace",
+    "projektová dokumentace",
+    "vedení dokumentace"
+  ],
+  "Project coordination": [
+    "project coordination",
+    "coordination",
+    "koordinace",
+    "koordinace projektu",
+    "koordinace aktivit"
+  ],
+  "Resource planning": [
+    "resource planning",
+    "resources",
+    "capacity planning",
+    "kapacity",
+    "plánování kapacit",
+    "plánování zdrojů"
+  ],
+  "Timeline management": [
+    "timeline",
+    "deadline",
+    "deadlines",
+    "schedule",
+    "harmonogram",
+    "termíny",
+    "časový plán"
+  ],
+  "Scope management": [
+    "scope",
+    "scope management",
+    "project scope",
+    "rozsah projektu",
+    "řízení rozsahu"
+  ],
+  "Meeting facilitation": [
+    "meeting facilitation",
+    "meetings",
+    "workshop facilitation",
+    "facilitation",
+    "meetingy",
+    "facilitace",
+    "vedení meetingů",
+    "vedení workshopů"
+  ],
+  "Project governance": [
+    "governance",
+    "project governance",
+    "governance projektu",
+    "řízení projektu",
+    "projektové řízení"
+  ],
 
-  "Agile": ["agile", "agilní"],
-  "Scrum": ["scrum", "scrum master", "sprint"],
-  "Kanban": ["kanban"],
-  "Sprint planning": ["sprint planning", "plánování sprintu"],
-  "Retrospectives": ["retrospective", "retrospektiva"],
-  "Backlog management": ["backlog", "backlog management"],
-  "Waterfall": ["waterfall"],
-  "Change management": ["change management", "řízení změn"],
-  "Process improvement": ["process improvement", "zlepšování procesů"],
-  "Requirements gathering": ["requirements", "sběr požadavků", "požadavky"],
+  "Agile": [
+    "agile",
+    "agile methodology",
+    "agilní",
+    "agilní metodika",
+    "agilní prostředí"
+  ],
+  "Scrum": [
+    "scrum",
+    "scrum master",
+    "sprint",
+    "sprinty"
+  ],
+  "Kanban": [
+    "kanban"
+  ],
+  "Sprint planning": [
+    "sprint planning",
+    "sprint planning meeting",
+    "plánování sprintu",
+    "sprint planning"
+  ],
+  "Retrospectives": [
+    "retrospective",
+    "retrospectives",
+    "retrospektiva",
+    "retrospektivy"
+  ],
+  "Backlog management": [
+    "backlog",
+    "backlog management",
+    "správa backlogu",
+    "produktový backlog"
+  ],
+  "Waterfall": [
+    "waterfall",
+    "vodopádový model"
+  ],
+  "Change management": [
+    "change management",
+    "change process",
+    "řízení změn",
+    "změnové řízení"
+  ],
+  "Process improvement": [
+    "process improvement",
+    "process optimization",
+    "zlepšování procesů",
+    "optimalizace procesů"
+  ],
+  "Requirements gathering": [
+    "requirements",
+    "requirements gathering",
+    "business requirements",
+    "sběr požadavků",
+    "požadavky",
+    "analýza požadavků"
+  ],
 
-  "Jira": ["jira"],
-  "Confluence": ["confluence"],
-  "MS Project": ["ms project", "microsoft project"],
-  "Asana": ["asana"],
-  "Trello": ["trello"],
-  "Notion": ["notion"],
-  "MS Excel": ["excel", "ms excel", "microsoft excel"],
-  "Power BI": ["power bi", "powerbi"],
-  "Slack": ["slack"],
-  "Microsoft Teams": ["teams", "microsoft teams"],
-  "Google Workspace": ["google workspace", "google docs", "google sheets"],
-  "Miro": ["miro"],
-  "Figma": ["figma"],
-  "CRM": ["crm"],
+  "Jira": [
+    "jira",
+    "atlassian jira"
+  ],
+  "Confluence": [
+    "confluence",
+    "atlassian confluence"
+  ],
+  "MS Project": [
+    "ms project",
+    "microsoft project"
+  ],
+  "Asana": [
+    "asana"
+  ],
+  "Trello": [
+    "trello"
+  ],
+  "Notion": [
+    "notion"
+  ],
+  "MS Excel": [
+    "excel",
+    "ms excel",
+    "microsoft excel",
+    "tabulky",
+    "kontingenční tabulky"
+  ],
+  "Power BI": [
+    "power bi",
+    "powerbi",
+    "dashboard",
+    "dashboardy"
+  ],
+  "Slack": [
+    "slack"
+  ],
+  "Microsoft Teams": [
+    "teams",
+    "microsoft teams",
+    "ms teams"
+  ],
+  "Google Workspace": [
+    "google workspace",
+    "google docs",
+    "google sheets",
+    "google drive"
+  ],
+  "Miro": [
+    "miro"
+  ],
+  "Figma": [
+    "figma"
+  ],
+  "CRM": [
+    "crm",
+    "customer relationship management"
+  ],
 
-  "Communication": ["communication", "komunikace", "komunikační schopnosti"],
-  "Leadership": ["leadership", "vedení týmu", "team lead"],
-  "Teamwork": ["teamwork", "týmová spolupráce"],
-  "Problem solving": ["problem solving", "řešení problémů"],
-  "Time management": ["time management", "organizace času"],
-  "Negotiation": ["negotiation", "vyjednávání"],
-  "Presentation skills": ["presentation", "prezentace", "prezentační schopnosti"],
-  "Conflict resolution": ["conflict", "řešení konfliktů"],
-  "Decision making": ["decision making", "rozhodování"],
-  "Critical thinking": ["critical thinking", "kritické myšlení"],
-  "Adaptability": ["adaptability", "adaptabilita"],
-  "Ownership": ["ownership", "odpovědnost"],
-  "Empathy": ["empathy", "empatie"],
-  "Stress management": ["stress management", "odolnost vůči stresu"],
+  "Communication": [
+    "communication",
+    "communication skills",
+    "komunikace",
+    "komunikační schopnosti",
+    "komunikační dovednosti"
+  ],
+  "Leadership": [
+    "leadership",
+    "team leadership",
+    "vedení týmu",
+    "vedení lidí",
+    "leadership"
+  ],
+  "Teamwork": [
+    "teamwork",
+    "team collaboration",
+    "týmová spolupráce",
+    "spolupráce v týmu"
+  ],
+  "Problem solving": [
+    "problem solving",
+    "solving problems",
+    "řešení problémů",
+    "schopnost řešit problémy"
+  ],
+  "Time management": [
+    "time management",
+    "organization of time",
+    "organizace času",
+    "řízení času"
+  ],
+  "Negotiation": [
+    "negotiation",
+    "negotiating",
+    "vyjednávání"
+  ],
+  "Presentation skills": [
+    "presentation",
+    "presentation skills",
+    "presenting",
+    "prezentace",
+    "prezentační schopnosti"
+  ],
+  "Conflict resolution": [
+    "conflict resolution",
+    "conflict management",
+    "conflict",
+    "řešení konfliktů",
+    "konflikty"
+  ],
+  "Decision making": [
+    "decision making",
+    "making decisions",
+    "rozhodování",
+    "schopnost rozhodovat"
+  ],
+  "Critical thinking": [
+    "critical thinking",
+    "analytical thinking",
+    "kritické myšlení",
+    "analytické myšlení"
+  ],
+  "Adaptability": [
+    "adaptability",
+    "flexibility",
+    "adaptabilita",
+    "flexibilita"
+  ],
+  "Ownership": [
+    "ownership",
+    "responsibility",
+    "accountability",
+    "odpovědnost",
+    "samostatnost"
+  ],
+  "Empathy": [
+    "empathy",
+    "empatie"
+  ],
+  "Stress management": [
+    "stress management",
+    "working under pressure",
+    "odolnost vůči stresu",
+    "práce pod tlakem"
+  ],
 
-  "Business analysis": ["business analysis", "business analytik", "analýza businessu"],
-  "KPI tracking": ["kpi", "kpis", "metriky"],
-  "Vendor management": ["vendor", "dodavatel", "supplier"],
-  "Customer orientation": ["customer", "zákazník", "customer orientation"],
-  "Strategic thinking": ["strategy", "strategické myšlení"],
-  "Financial awareness": ["financial", "finance", "náklady"],
-  "Data-driven decision making": ["data-driven", "data driven", "práce s daty"],
-  "Documentation": ["documentation", "dokumentace"],
-  "Quality management": ["quality", "kvalita", "quality management"],
-  "Process mapping": ["process mapping", "mapování procesů"],
+  "Business analysis": [
+    "business analysis",
+    "business analyst",
+    "business requirements",
+    "business analýza",
+    "analýza businessu",
+    "byznys analýza"
+  ],
+  "KPI tracking": [
+    "kpi",
+    "kpis",
+    "metrics",
+    "performance metrics",
+    "metriky",
+    "sledování kpi"
+  ],
+  "Vendor management": [
+    "vendor",
+    "supplier",
+    "vendor management",
+    "supplier management",
+    "dodavatel",
+    "dodavatelé",
+    "řízení dodavatelů"
+  ],
+  "Customer orientation": [
+    "customer orientation",
+    "customer focus",
+    "client focus",
+    "zákazník",
+    "orientace na zákazníka",
+    "klient"
+  ],
+  "Strategic thinking": [
+    "strategic thinking",
+    "strategy",
+    "strategické myšlení",
+    "strategie"
+  ],
+  "Financial awareness": [
+    "financial awareness",
+    "finance",
+    "costs",
+    "financial",
+    "finanční přehled",
+    "náklady",
+    "finance"
+  ],
+  "Data-driven decision making": [
+    "data-driven",
+    "data driven",
+    "data analysis",
+    "working with data",
+    "práce s daty",
+    "datově řízené rozhodování"
+  ],
+  "Documentation": [
+    "documentation",
+    "dokumentace",
+    "technická dokumentace",
+    "procesní dokumentace"
+  ],
+  "Quality management": [
+    "quality",
+    "quality management",
+    "quality assurance",
+    "kvalita",
+    "řízení kvality"
+  ],
+  "Process mapping": [
+    "process mapping",
+    "process map",
+    "mapování procesů",
+    "procesní mapa"
+  ],
 
-  "English": ["english", "angličtina", "anglický jazyk"],
-  "Czech": ["czech", "čeština", "český jazyk"],
-  "Slovak": ["slovak", "slovenština", "slovenský jazyk"],
-  "German": ["german", "němčina", "nemecký jazyk"],
-  "Polish": ["polish", "polština"],
-  "French": ["french", "francouzština"]
+  "English": [
+    "english",
+    "english language",
+    "angličtina",
+    "anglický jazyk",
+    "znalost angličtiny"
+  ],
+  "Czech": [
+    "czech",
+    "czech language",
+    "čeština",
+    "český jazyk"
+  ],
+  "Slovak": [
+    "slovak",
+    "slovak language",
+    "slovenština",
+    "slovenský jazyk"
+  ],
+  "German": [
+    "german",
+    "german language",
+    "němčina",
+    "nemecký jazyk",
+    "znalost němčiny"
+  ],
+  "Polish": [
+    "polish",
+    "polish language",
+    "polština"
+  ],
+  "French": [
+    "french",
+    "french language",
+    "francouzština"
+  ]
 };
 
 async function extractJobText(jobUrl, fallbackText) {
@@ -137,9 +498,37 @@ function scoreSkill(levelIndex) {
 }
 
 function trafficLightFromScore(score) {
-  if (score >= 75) return "Silná zhoda";
-  if (score >= 45) return "Stredná zhoda";
-  return "Slabá zhoda";
+  if (score >= 75) return "Strong match";
+  if (score >= 45) return "Medium match";
+  return "Weak match";
+}
+
+function buildRecommendations(matchedSkills, missingSkills, requiredSkills) {
+  const recommendations = [];
+
+  if (missingSkills.length > 0) {
+    recommendations.push(
+      "Focus first on skills that appear in the job description but are rated below intermediate in your profile."
+    );
+  }
+
+  if (matchedSkills.length > 0) {
+    recommendations.push(
+      "Use your strongest matching skills in your CV and cover letter with wording similar to the job description."
+    );
+  }
+
+  recommendations.push(
+    "Add evidence to your CV: a project example, measurable result, tool used, team size, deadline, budget or business impact."
+  );
+
+  if (requiredSkills.length === 0) {
+    recommendations.push(
+      "The system did not detect many known skills in the job text. For a better result, paste the full job description, not only a short excerpt."
+    );
+  }
+
+  return recommendations;
 }
 
 export async function POST(request) {
@@ -156,7 +545,7 @@ export async function POST(request) {
       return Response.json(
         {
           error:
-            "Chýbajú skills alebo text pracovnej ponuky. Vlož aspoň niekoľko skills a text ponuky."
+            "Missing skills or job description text. Rate at least a few skills and paste a job description."
         },
         { status: 400 }
       );
@@ -183,29 +572,11 @@ export async function POST(request) {
       .filter((item) => item.levelIndex < 3)
       .map((item) => `${item.skill} — ${item.level}`);
 
-    const cvRecommendations = [];
-
-    if (missingSkills.length > 0) {
-      cvRecommendations.push(
-        "Najprv rieš skills, ktoré pracovná ponuka vyžaduje a ty ich máš pod úrovňou stredne pokročilý."
-      );
-    }
-
-    if (matchedSkills.length > 0) {
-      cvRecommendations.push(
-        "Silné skills z výsledku použi v CV rovnakými slovami, aké používa pracovná ponuka."
-      );
-    }
-
-    cvRecommendations.push(
-      "Do CV doplň konkrétne dôkazy: projekt, výsledok, nástroj, veľkosť tímu alebo merateľný dopad."
+    const cvRecommendations = buildRecommendations(
+      matchedSkills,
+      missingSkills,
+      requiredSkills
     );
-
-    if (requiredSkills.length === 0) {
-      cvRecommendations.push(
-        "Systém nenašiel v ponuke veľa známych skills. Pre presnejší výsledok vlož celý text pracovnej ponuky, nie iba krátky úryvok."
-      );
-    }
 
     return Response.json({
       matchScore,
@@ -215,14 +586,14 @@ export async function POST(request) {
       cvRecommendations,
       summary:
         requiredSkills.length > 0
-          ? `Systém našiel ${requiredSkills.length} relevantných skills z pracovnej ponuky a porovnal ich s tvojím profilom.`
-          : "Systém nenašiel jasné požiadavky v texte ponuky, preto použil časť tvojho vyplneného profilu ako orientačný výpočet."
+          ? `The system detected ${requiredSkills.length} relevant skills in the job description and compared them with your saved skill profile. The result is based on keyword matching, not on a paid AI model.`
+          : "The system did not detect clear known skills in the job description, so it used part of your filled skill profile as an orientation estimate. Paste a fuller job description for better accuracy."
     });
   } catch (error) {
     console.error("Analyze route error:", error);
 
     return Response.json(
-      { error: "Serverová chyba pri analýze." },
+      { error: "Server error during analysis." },
       { status: 500 }
     );
   }
