@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "skillsHeatmapProfileV2";
+const PROFILE_STORAGE_KEY = "skillsHeatmapProfileV4";
+const USERS_STORAGE_KEY = "skillsHeatmapUsersV1";
+const SESSION_STORAGE_KEY = "skillsHeatmapSessionV1";
 
 const SKILL_LEVELS = [
   "Not rated",
@@ -28,98 +30,98 @@ const QUESTIONS = [
     group: "Project Management",
     skill: "Project planning",
     description:
-      "The ability to break a project into phases, define milestones, estimate effort and create a realistic delivery plan."
+      "Break a project into phases, define milestones, estimate effort and create a realistic delivery plan."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Roadmap planning",
     description:
-      "Roadmap planning connects long-term goals with practical delivery steps. It is important when priorities change over time."
+      "Connect long-term goals with practical delivery steps and understand how priorities change over time."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Risk management",
     description:
-      "Risk management means identifying possible problems early, assessing impact and preparing mitigation actions."
+      "Identify possible problems early, assess their impact and prepare mitigation actions."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Budgeting",
     description:
-      "Budgeting is about understanding costs, tracking spending and making sure the project stays financially realistic."
+      "Understand costs, track spending and keep the project financially realistic."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Reporting",
     description:
-      "Reporting means communicating project status clearly: progress, risks, blockers, deadlines and next steps."
+      "Communicate project status clearly: progress, risks, blockers, deadlines and next steps."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Stakeholder management",
     description:
-      "This is the ability to work with people affected by the project, manage expectations and keep them aligned."
+      "Work with people affected by the project, manage expectations and keep them aligned."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Prioritization",
     description:
-      "Prioritization helps decide what matters most when time, people or budget are limited."
+      "Decide what matters most when time, people or budget are limited."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Project documentation",
     description:
-      "Project documentation keeps decisions, requirements, plans and responsibilities clear and traceable."
+      "Keep decisions, requirements, plans and responsibilities clear and traceable."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Project coordination",
     description:
-      "Coordination means keeping tasks, people, meetings and deadlines organized so the project keeps moving."
+      "Keep tasks, people, meetings and deadlines organized so the project keeps moving."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Resource planning",
     description:
-      "Resource planning means knowing who is needed, when they are needed and whether the team has enough capacity."
+      "Know who is needed, when they are needed and whether the team has enough capacity."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Timeline management",
     description:
-      "Timeline management focuses on deadlines, dependencies and realistic scheduling."
+      "Manage deadlines, dependencies and realistic scheduling."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Scope management",
     description:
-      "Scope management prevents uncontrolled project expansion and keeps delivery focused on agreed goals."
+      "Prevent uncontrolled project expansion and keep delivery focused on agreed goals."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Meeting facilitation",
     description:
-      "Good facilitation makes meetings useful: clear agenda, decisions, owners and follow-up actions."
+      "Run useful meetings with clear agenda, decisions, owners and follow-up actions."
   },
   {
     type: "skill",
     group: "Project Management",
     skill: "Project governance",
     description:
-      "Governance defines how decisions are made, who approves changes and how project control is maintained."
+      "Define how decisions are made, who approves changes and how project control is maintained."
   },
 
   {
@@ -127,70 +129,70 @@ const QUESTIONS = [
     group: "Agile / Methods",
     skill: "Agile",
     description:
-      "Agile is an iterative approach to delivering value, adapting to feedback and working in smaller increments."
+      "Deliver value iteratively, adapt to feedback and work in smaller increments."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Scrum",
     description:
-      "Scrum is an agile framework using sprints, roles, ceremonies and backlog management."
+      "Use sprints, roles, ceremonies and backlog management to deliver work iteratively."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Kanban",
     description:
-      "Kanban visualizes work, limits work in progress and helps improve flow."
+      "Visualize work, limit work in progress and improve delivery flow."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Sprint planning",
     description:
-      "Sprint planning defines what the team will deliver in the next sprint and how they plan to do it."
+      "Define what the team will deliver in the next sprint and how it will be done."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Retrospectives",
     description:
-      "Retrospectives help teams reflect on what worked, what did not and what should improve."
+      "Help teams reflect on what worked, what did not and what should improve."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Backlog management",
     description:
-      "Backlog management means keeping tasks, user stories and priorities organized and understandable."
+      "Keep tasks, user stories and priorities organized and understandable."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Waterfall",
     description:
-      "Waterfall is a sequential project approach with defined phases and less flexibility during delivery."
+      "Work with a sequential project approach with defined phases and lower flexibility."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Change management",
     description:
-      "Change management helps people and organizations adopt new processes, tools or structures."
+      "Help people and organizations adopt new processes, tools or structures."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Process improvement",
     description:
-      "Process improvement means identifying inefficient workflows and making them simpler, faster or more reliable."
+      "Identify inefficient workflows and make them simpler, faster or more reliable."
   },
   {
     type: "skill",
     group: "Agile / Methods",
     skill: "Requirements gathering",
     description:
-      "Requirements gathering means understanding what users, clients or stakeholders actually need."
+      "Understand what users, clients or stakeholders actually need."
   },
 
   {
@@ -198,98 +200,98 @@ const QUESTIONS = [
     group: "Tools",
     skill: "Jira",
     description:
-      "Jira is commonly used for task tracking, sprint planning, backlog management and agile reporting."
+      "Use Jira for task tracking, sprint planning, backlog management and agile reporting."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Confluence",
     description:
-      "Confluence is used for documentation, meeting notes, project pages and knowledge sharing."
+      "Use Confluence for documentation, meeting notes, project pages and knowledge sharing."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "MS Project",
     description:
-      "MS Project supports project scheduling, dependencies, resources and timeline management."
+      "Use MS Project for scheduling, dependencies, resources and timeline management."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Asana",
     description:
-      "Asana is used to manage tasks, timelines, responsibilities and team coordination."
+      "Manage tasks, timelines, responsibilities and team coordination."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Trello",
     description:
-      "Trello is a simple visual task management tool based on boards, lists and cards."
+      "Use boards, lists and cards for lightweight visual task management."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Notion",
     description:
-      "Notion can be used for documentation, planning, databases and lightweight project management."
+      "Use Notion for documentation, planning, databases and lightweight project management."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "MS Excel",
     description:
-      "Excel is useful for tracking, reporting, budgeting, analysis and project overview tables."
+      "Use Excel for tracking, reporting, budgeting, analysis and project overview tables."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Power BI",
     description:
-      "Power BI helps create dashboards and visualize project or business data."
+      "Create dashboards and visualize project or business data."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Slack",
     description:
-      "Slack is used for team communication, quick updates and channel-based collaboration."
+      "Use Slack for team communication, quick updates and channel-based collaboration."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Microsoft Teams",
     description:
-      "Microsoft Teams supports meetings, chat, file sharing and collaboration in many organizations."
+      "Use Teams for meetings, chat, file sharing and collaboration."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Google Workspace",
     description:
-      "Google Workspace includes tools such as Docs, Sheets, Drive and Meet for collaboration."
+      "Work with Google Docs, Sheets, Drive and Meet for collaboration."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Miro",
     description:
-      "Miro is useful for workshops, brainstorming, process mapping and visual collaboration."
+      "Use Miro for workshops, brainstorming, process mapping and visual collaboration."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "Figma",
     description:
-      "Figma is often used with design teams for prototypes, product mockups and visual collaboration."
+      "Collaborate with design teams on prototypes, product mockups and visual materials."
   },
   {
     type: "skill",
     group: "Tools",
     skill: "CRM",
     description:
-      "CRM tools help manage customer data, relationships, pipelines and communication history."
+      "Work with customer data, pipelines, relationships and communication history."
   },
 
   {
@@ -297,98 +299,98 @@ const QUESTIONS = [
     group: "Soft Skills",
     skill: "Communication",
     description:
-      "Communication is critical for explaining goals, sharing status, resolving ambiguity and aligning stakeholders."
+      "Explain goals, share status, resolve ambiguity and align stakeholders."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Leadership",
     description:
-      "Leadership means guiding people, making decisions and creating clarity even without formal authority."
+      "Guide people, make decisions and create clarity even without formal authority."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Teamwork",
     description:
-      "Teamwork is the ability to collaborate, support others and contribute to a shared outcome."
+      "Collaborate, support others and contribute to a shared outcome."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Problem solving",
     description:
-      "Problem solving means identifying root causes, evaluating options and choosing practical solutions."
+      "Identify root causes, evaluate options and choose practical solutions."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Time management",
     description:
-      "Time management helps you handle deadlines, meetings, priorities and workload without chaos."
+      "Handle deadlines, meetings, priorities and workload without chaos."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Negotiation",
     description:
-      "Negotiation is useful when aligning scope, deadlines, budgets, priorities or stakeholder expectations."
+      "Align scope, deadlines, budgets, priorities or stakeholder expectations."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Presentation skills",
     description:
-      "Presentation skills help you explain ideas, results and project updates clearly to different audiences."
+      "Explain ideas, results and project updates clearly to different audiences."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Conflict resolution",
     description:
-      "Conflict resolution means handling disagreements constructively before they damage the project."
+      "Handle disagreements constructively before they damage the project."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Decision making",
     description:
-      "Decision making is the ability to choose a direction with incomplete information and accept responsibility."
+      "Choose a direction with incomplete information and accept responsibility."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Critical thinking",
     description:
-      "Critical thinking means questioning assumptions, checking evidence and avoiding weak conclusions."
+      "Question assumptions, check evidence and avoid weak conclusions."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Adaptability",
     description:
-      "Adaptability is the ability to respond to changes without losing focus or momentum."
+      "Respond to changes without losing focus or momentum."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Ownership",
     description:
-      "Ownership means taking responsibility for results, not only completing assigned tasks."
+      "Take responsibility for results, not only for assigned tasks."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Empathy",
     description:
-      "Empathy helps understand user needs, stakeholder concerns and team dynamics."
+      "Understand user needs, stakeholder concerns and team dynamics."
   },
   {
     type: "skill",
     group: "Soft Skills",
     skill: "Stress management",
     description:
-      "Stress management is important when projects face deadlines, conflicts or high uncertainty."
+      "Stay effective when projects face deadlines, conflicts or uncertainty."
   },
 
   {
@@ -396,70 +398,70 @@ const QUESTIONS = [
     group: "Business Skills",
     skill: "Business analysis",
     description:
-      "Business analysis connects business needs with practical solutions, requirements and measurable outcomes."
+      "Connect business needs with practical solutions, requirements and measurable outcomes."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "KPI tracking",
     description:
-      "KPI tracking means monitoring key metrics to understand progress and performance."
+      "Monitor key metrics to understand progress and performance."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Vendor management",
     description:
-      "Vendor management involves working with external suppliers, contracts, deadlines and delivery quality."
+      "Work with external suppliers, contracts, deadlines and delivery quality."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Customer orientation",
     description:
-      "Customer orientation means understanding customer needs and using them to guide decisions."
+      "Understand customer needs and use them to guide decisions."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Strategic thinking",
     description:
-      "Strategic thinking connects daily work with long-term goals and business priorities."
+      "Connect daily work with long-term goals and business priorities."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Financial awareness",
     description:
-      "Financial awareness helps understand cost, value, profitability and resource trade-offs."
+      "Understand cost, value, profitability and resource trade-offs."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Data-driven decision making",
     description:
-      "Data-driven decision making means using evidence and metrics instead of assumptions."
+      "Use evidence and metrics instead of assumptions."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Documentation",
     description:
-      "Documentation creates clarity, continuity and shared understanding across the team."
+      "Create clarity, continuity and shared understanding across the team."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Quality management",
     description:
-      "Quality management focuses on standards, acceptance criteria, feedback and continuous improvement."
+      "Work with standards, acceptance criteria, feedback and continuous improvement."
   },
   {
     type: "skill",
     group: "Business Skills",
     skill: "Process mapping",
     description:
-      "Process mapping helps visualize how work flows and where inefficiencies exist."
+      "Visualize how work flows and where inefficiencies exist."
   },
 
   {
@@ -467,21 +469,21 @@ const QUESTIONS = [
     group: "Languages",
     skill: "English",
     description:
-      "English is often required for international teams, documentation, meetings and stakeholder communication."
+      "English is often required for international teams, documentation and stakeholder communication."
   },
   {
     type: "language",
     group: "Languages",
     skill: "Czech",
     description:
-      "Czech can be important for local communication, clients, documentation and internal operations."
+      "Czech can be important for local communication, clients and documentation."
   },
   {
     type: "language",
     group: "Languages",
     skill: "Slovak",
     description:
-      "Slovak can be useful for communication in Czech-Slovak teams and regional business environments."
+      "Slovak can be useful in Czech-Slovak teams and regional business environments."
   },
   {
     type: "language",
@@ -495,14 +497,14 @@ const QUESTIONS = [
     group: "Languages",
     skill: "Polish",
     description:
-      "Polish can help in Central European teams, suppliers, clients or regional operations."
+      "Polish can help in Central European teams, suppliers or regional operations."
   },
   {
     type: "language",
     group: "Languages",
     skill: "French",
     description:
-      "French can be useful in international companies, customer-facing roles or European projects."
+      "French can be useful in international companies and European projects."
   }
 ];
 
@@ -519,6 +521,23 @@ function getLevelLabel(question, value) {
   return SKILL_LEVELS[value];
 }
 
+function getUsers() {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(USERS_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveUsers(users) {
+  window.localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function createId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export default function Home() {
   const [answers, setAnswers] = useState(createInitialAnswers());
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -527,15 +546,53 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [profileSaved, setProfileSaved] = useState(false);
 
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("signup");
+  const [completionPromptShown, setCompletionPromptShown] = useState(false);
+
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
+
+  const [analysisCompany, setAnalysisCompany] = useState("");
+  const [analysisNote, setAnalysisNote] = useState("");
+
   const currentQuestion = QUESTIONS[currentIndex];
   const progress = Math.round(((currentIndex + 1) / QUESTIONS.length) * 100);
 
-  useEffect(() => {
-    const savedProfile = window.localStorage.getItem(STORAGE_KEY);
+  const answeredCount = useMemo(() => {
+    return Object.values(answers).filter((value) => value > 0).length;
+  }, [answers]);
 
-    if (savedProfile) {
+  const currentUser = useMemo(() => {
+    if (!currentUserEmail) return null;
+    const users = getUsers();
+    return users[currentUserEmail] || null;
+  }, [currentUserEmail, authModalOpen, profileSaved, result]);
+
+  useEffect(() => {
+    const users = getUsers();
+    const savedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+
+    if (savedSession && users[savedSession]) {
+      const user = users[savedSession];
+      setCurrentUserEmail(user.email);
+      setProfileName(user.name);
+      setProfileEmail(user.email);
+      setAnswers({
+        ...createInitialAnswers(),
+        ...user.skillProfile
+      });
+      setProfileSaved(true);
+      return;
+    }
+
+    const localProfile = window.localStorage.getItem(PROFILE_STORAGE_KEY);
+
+    if (localProfile) {
       try {
-        const parsedProfile = JSON.parse(savedProfile);
+        const parsedProfile = JSON.parse(localProfile);
         setAnswers({
           ...createInitialAnswers(),
           ...parsedProfile
@@ -547,9 +604,17 @@ export default function Home() {
     }
   }, []);
 
-  const answeredCount = useMemo(() => {
-    return Object.values(answers).filter((value) => value > 0).length;
-  }, [answers]);
+  useEffect(() => {
+    if (
+      answeredCount === QUESTIONS.length &&
+      !completionPromptShown &&
+      !currentUserEmail
+    ) {
+      setCompletionPromptShown(true);
+      setModalMode("signup");
+      setAuthModalOpen(true);
+    }
+  }, [answeredCount, completionPromptShown, currentUserEmail]);
 
   function updateAnswer(value) {
     setAnswers((previous) => ({
@@ -567,26 +632,201 @@ export default function Home() {
     setCurrentIndex((index) => Math.min(QUESTIONS.length - 1, index + 1));
   }
 
-  function saveSkillProfile() {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
-    setProfileSaved(true);
-    alert("Your skill profile has been saved in this browser.");
+  function openSignup() {
+    setModalMode("signup");
+    setAuthModalOpen(true);
   }
 
-  function resetSkillProfile() {
-    const confirmed = confirm("Do you really want to delete your saved skill profile?");
+  function openLogin() {
+    setModalMode("login");
+    setAuthModalOpen(true);
+  }
+
+  function openProfile() {
+    if (!currentUserEmail) {
+      openLogin();
+      return;
+    }
+
+    const users = getUsers();
+    const user = users[currentUserEmail];
+
+    if (user) {
+      setProfileName(user.name);
+      setProfileEmail(user.email);
+      setProfilePassword("");
+    }
+
+    setModalMode("profile");
+    setAuthModalOpen(true);
+  }
+
+  function handleSignup(event) {
+    event.preventDefault();
+
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") || "").trim();
+    const email = String(form.get("email") || "").trim().toLowerCase();
+    const password = String(form.get("password") || "").trim();
+
+    if (!name || !email || !password) {
+      alert("Fill in name, email and password.");
+      return;
+    }
+
+    const users = getUsers();
+
+    if (users[email]) {
+      alert("An account with this email already exists. Log in instead.");
+      return;
+    }
+
+    users[email] = {
+      id: createId(),
+      name,
+      email,
+      password,
+      skillProfile: answers,
+      analyses: []
+    };
+
+    saveUsers(users);
+    window.localStorage.setItem(SESSION_STORAGE_KEY, email);
+    window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(answers));
+
+    setCurrentUserEmail(email);
+    setProfileName(name);
+    setProfileEmail(email);
+    setProfileSaved(true);
+    setModalMode("profile");
+  }
+
+  function handleLogin(event) {
+    event.preventDefault();
+
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") || "").trim().toLowerCase();
+    const password = String(form.get("password") || "").trim();
+
+    const users = getUsers();
+    const user = users[email];
+
+    if (!user || user.password !== password) {
+      alert("Incorrect email or password.");
+      return;
+    }
+
+    setCurrentUserEmail(email);
+    setProfileName(user.name);
+    setProfileEmail(user.email);
+    setAnswers({
+      ...createInitialAnswers(),
+      ...user.skillProfile
+    });
+    setProfileSaved(true);
+    window.localStorage.setItem(SESSION_STORAGE_KEY, email);
+    setModalMode("profile");
+  }
+
+  function saveSkillProfile() {
+    if (currentUserEmail) {
+      const users = getUsers();
+      const user = users[currentUserEmail];
+
+      if (user) {
+        user.skillProfile = answers;
+        users[currentUserEmail] = user;
+        saveUsers(users);
+      }
+    }
+
+    window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(answers));
+    setProfileSaved(true);
+    alert("Your skill profile has been saved.");
+  }
+
+  function saveProfileChanges() {
+    if (!currentUserEmail) return;
+
+    const users = getUsers();
+    const user = users[currentUserEmail];
+
+    if (!user) return;
+
+    const newEmail = profileEmail.trim().toLowerCase();
+
+    if (!profileName.trim() || !newEmail) {
+      alert("Name and email cannot be empty.");
+      return;
+    }
+
+    if (newEmail !== currentUserEmail && users[newEmail]) {
+      alert("This email is already used by another profile.");
+      return;
+    }
+
+    const updatedUser = {
+      ...user,
+      name: profileName.trim(),
+      email: newEmail,
+      password: profilePassword.trim() ? profilePassword.trim() : user.password,
+      skillProfile: answers
+    };
+
+    delete users[currentUserEmail];
+    users[newEmail] = updatedUser;
+
+    saveUsers(users);
+    window.localStorage.setItem(SESSION_STORAGE_KEY, newEmail);
+
+    setCurrentUserEmail(newEmail);
+    setProfileEmail(newEmail);
+    setProfilePassword("");
+    setProfileSaved(true);
+
+    alert("Profile updated.");
+  }
+
+  function deleteProfile() {
+    if (!currentUserEmail) return;
+
+    const confirmed = confirm(
+      "Do you really want to delete your profile and all saved analyses?"
+    );
+
     if (!confirmed) return;
 
-    const emptyProfile = createInitialAnswers();
-    setAnswers(emptyProfile);
-    window.localStorage.removeItem(STORAGE_KEY);
+    const users = getUsers();
+    delete users[currentUserEmail];
+    saveUsers(users);
+
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    window.localStorage.removeItem(PROFILE_STORAGE_KEY);
+
+    setCurrentUserEmail("");
+    setProfileName("");
+    setProfileEmail("");
+    setProfilePassword("");
+    setAnswers(createInitialAnswers());
     setProfileSaved(false);
     setResult(null);
+    setAuthModalOpen(false);
+  }
+
+  function logout() {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    setCurrentUserEmail("");
+    setProfileName("");
+    setProfileEmail("");
+    setProfilePassword("");
+    setAuthModalOpen(false);
   }
 
   function clearPositionText() {
     setJobText("");
     setResult(null);
+    setAnalysisCompany("");
+    setAnalysisNote("");
   }
 
   async function handleAnalyze() {
@@ -636,7 +876,12 @@ export default function Home() {
         return;
       }
 
-      setResult(data);
+      setResult({
+        ...data,
+        id: createId(),
+        createdAt: new Date().toISOString(),
+        jobText
+      });
     } catch (error) {
       alert("Server connection error.");
     }
@@ -644,9 +889,81 @@ export default function Home() {
     setLoading(false);
   }
 
+  function saveAnalysis() {
+    if (!result) return;
+
+    if (!currentUserEmail) {
+      setModalMode("signup");
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const company = analysisCompany.trim();
+    const note = analysisNote.trim();
+
+    if (!company) {
+      alert("Add a company or position name before saving.");
+      return;
+    }
+
+    const users = getUsers();
+    const user = users[currentUserEmail];
+
+    if (!user) return;
+
+    const savedAnalysis = {
+      ...result,
+      company,
+      note
+    };
+
+    user.analyses = [savedAnalysis, ...(user.analyses || [])];
+    user.skillProfile = answers;
+    users[currentUserEmail] = user;
+
+    saveUsers(users);
+    setModalMode("profile");
+    setAuthModalOpen(true);
+    setAnalysisCompany("");
+    setAnalysisNote("");
+    alert("Analysis saved to your profile.");
+  }
+
   return (
     <>
       <main className="page">
+        <nav className="topNav">
+          <div className="brand">
+            <div className="brandLogo">SH</div>
+            <div>
+              <strong>Skills Heatmap</strong>
+              <span>Career fit checker</span>
+            </div>
+          </div>
+
+          <div className="navActions">
+            {currentUserEmail ? (
+              <>
+                <button className="smallSecondary" onClick={openProfile}>
+                  My profile
+                </button>
+                <button className="smallGhost" onClick={logout}>
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="smallSecondary" onClick={openLogin}>
+                  Log in
+                </button>
+                <button className="smallPrimary" onClick={openSignup}>
+                  Sign up
+                </button>
+              </>
+            )}
+          </div>
+        </nav>
+
         <section className="hero">
           <div className="heroContent">
             <div className="badge">Student career tool · MVP prototype</div>
@@ -674,9 +991,9 @@ export default function Home() {
             <h3>How it works</h3>
             <ol>
               <li>Rate your project management skills.</li>
-              <li>Save your profile in this browser.</li>
-              <li>Paste a job description.</li>
-              <li>Get a skills heatmap and improvement plan.</li>
+              <li>Create a profile and save your skills.</li>
+              <li>Paste different job descriptions.</li>
+              <li>Save analyses and return to them later.</li>
             </ol>
           </div>
         </section>
@@ -687,12 +1004,12 @@ export default function Home() {
             <p>Understand what you already have and what blocks you from stronger roles.</p>
           </div>
           <div>
-            <strong>For career planning</strong>
-            <p>Turn vague job requirements into concrete skill gaps.</p>
+            <strong>Saved profile</strong>
+            <p>Fill the questionnaire once and reuse your profile across different job descriptions.</p>
           </div>
           <div>
-            <strong>For Agile delivery</strong>
-            <p>A realistic MVP: structured input, quick iteration and measurable output.</p>
+            <strong>Saved analyses</strong>
+            <p>Keep comparisons for later and add notes such as company or position name.</p>
           </div>
         </section>
 
@@ -705,9 +1022,9 @@ export default function Home() {
 
           <div className="profileStatus">
             <span>
-              {profileSaved ? "Profile saved in browser" : "Profile not saved yet"}
+              {profileSaved ? "Profile saved" : "Profile not saved yet"}
             </span>
-            <span>Rated skills: {answeredCount}</span>
+            <span>Rated skills: {answeredCount} / {QUESTIONS.length}</span>
           </div>
 
           <div className="progressMeta">
@@ -721,8 +1038,8 @@ export default function Home() {
 
           <div className="saveActions">
             <button onClick={saveSkillProfile}>Save my skill profile</button>
-            <button className="secondary" onClick={resetSkillProfile}>
-              Delete saved profile
+            <button className="secondary" onClick={openProfile}>
+              Open profile
             </button>
           </div>
         </section>
@@ -832,9 +1149,168 @@ export default function Home() {
               <h3>Summary</h3>
               <p>{result.summary}</p>
             </div>
+
+            <div className="saveAnalysisBox">
+              <h3>Save this analysis</h3>
+              <p>
+                Add a company or position name and an optional note. You can return
+                to saved comparisons from your profile.
+              </p>
+
+              <input
+                placeholder="Company or position name"
+                value={analysisCompany}
+                onChange={(event) => setAnalysisCompany(event.target.value)}
+              />
+
+              <textarea
+                className="smallTextarea"
+                placeholder="Optional note"
+                value={analysisNote}
+                onChange={(event) => setAnalysisNote(event.target.value)}
+              />
+
+              <button onClick={saveAnalysis}>
+                Save analysis to profile
+              </button>
+            </div>
           </section>
         )}
       </main>
+
+      {authModalOpen && (
+        <div className="modalOverlay">
+          <div className="modal">
+            <button className="modalClose" onClick={() => setAuthModalOpen(false)}>
+              ×
+            </button>
+
+            {modalMode === "signup" && (
+              <>
+                <h2>Create your profile</h2>
+                <p className="modalText">
+                  Save your skill profile and keep job comparisons for later.
+                  This demo stores data locally in your browser.
+                </p>
+
+                <form onSubmit={handleSignup} className="modalForm">
+                  <label>Name</label>
+                  <input name="name" placeholder="Your name" />
+
+                  <label>Email</label>
+                  <input name="email" type="email" placeholder="you@example.com" />
+
+                  <label>Password</label>
+                  <input name="password" type="password" placeholder="Create password" />
+
+                  <button type="submit">Create profile</button>
+                </form>
+
+                <button className="textButton" onClick={() => setModalMode("login")}>
+                  Already have a profile? Log in
+                </button>
+              </>
+            )}
+
+            {modalMode === "login" && (
+              <>
+                <h2>Log in</h2>
+                <p className="modalText">
+                  Open your saved skill profile and previous analyses.
+                </p>
+
+                <form onSubmit={handleLogin} className="modalForm">
+                  <label>Email</label>
+                  <input name="email" type="email" placeholder="you@example.com" />
+
+                  <label>Password</label>
+                  <input name="password" type="password" placeholder="Password" />
+
+                  <button type="submit">Log in</button>
+                </form>
+
+                <button className="textButton" onClick={() => setModalMode("signup")}>
+                  No profile yet? Sign up
+                </button>
+              </>
+            )}
+
+            {modalMode === "profile" && (
+              <>
+                <h2>My profile</h2>
+                <p className="modalText">
+                  Manage your profile, update your saved skill profile and return
+                  to previous job comparisons.
+                </p>
+
+                {currentUser ? (
+                  <>
+                    <div className="profileEdit">
+                      <label>Name</label>
+                      <input
+                        value={profileName}
+                        onChange={(event) => setProfileName(event.target.value)}
+                      />
+
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        value={profileEmail}
+                        onChange={(event) => setProfileEmail(event.target.value)}
+                      />
+
+                      <label>New password</label>
+                      <input
+                        type="password"
+                        placeholder="Leave empty to keep current password"
+                        value={profilePassword}
+                        onChange={(event) => setProfilePassword(event.target.value)}
+                      />
+
+                      <button onClick={saveProfileChanges}>Save profile changes</button>
+                    </div>
+
+                    <div className="profileActions">
+                      <button className="secondary" onClick={saveSkillProfile}>
+                        Save current skills
+                      </button>
+                      <button className="secondary" onClick={logout}>
+                        Log out
+                      </button>
+                      <button className="danger" onClick={deleteProfile}>
+                        Delete profile
+                      </button>
+                    </div>
+
+                    <div className="savedAnalyses">
+                      <h3>Saved analyses</h3>
+
+                      {!currentUser.analyses || currentUser.analyses.length === 0 ? (
+                        <p className="emptyText">No saved analyses yet.</p>
+                      ) : (
+                        currentUser.analyses.map((analysis) => (
+                          <div className="analysisItem" key={analysis.id}>
+                            <div>
+                              <strong>{analysis.company}</strong>
+                              <span>
+                                {new Date(analysis.createdAt).toLocaleDateString()} · {analysis.matchScore}% · {analysis.trafficLight}
+                              </span>
+                            </div>
+
+                            {analysis.note && <p>{analysis.note}</p>}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="emptyText">Log in or create a profile first.</p>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
         * {
@@ -857,7 +1333,74 @@ export default function Home() {
         .page {
           max-width: 1180px;
           margin: 0 auto;
-          padding: 34px 20px 60px;
+          padding: 26px 20px 60px;
+        }
+
+        .topNav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 18px;
+          margin-bottom: 22px;
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .brandLogo {
+          width: 46px;
+          height: 46px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #5f7fff, #111827);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 1000;
+        }
+
+        .brand strong,
+        .brand span {
+          display: block;
+        }
+
+        .brand span {
+          color: #6b7280;
+          font-size: 13px;
+          margin-top: 2px;
+        }
+
+        .navActions {
+          display: flex;
+          gap: 10px;
+        }
+
+        .smallPrimary,
+        .smallSecondary,
+        .smallGhost {
+          padding: 11px 14px;
+          width: auto;
+          border-radius: 999px;
+          font-size: 14px;
+        }
+
+        .smallPrimary {
+          background: #111827;
+          color: white;
+        }
+
+        .smallSecondary {
+          background: #eef2ff;
+          color: #3730a3;
+        }
+
+        .smallGhost {
+          background: transparent;
+          color: #111827;
+          border: 1px solid #d1d5db;
         }
 
         .hero {
@@ -1077,7 +1620,8 @@ export default function Home() {
 
         .saveActions,
         .positionActions,
-        .navigation {
+        .navigation,
+        .profileActions {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 14px;
@@ -1157,6 +1701,7 @@ export default function Home() {
           margin-bottom: 10px;
         }
 
+        input,
         textarea {
           width: 100%;
           border: 1px solid #d1d5db;
@@ -1165,10 +1710,19 @@ export default function Home() {
           font-size: 15px;
           outline: none;
           background: white;
+        }
+
+        textarea {
           min-height: 230px;
           resize: vertical;
         }
 
+        .smallTextarea {
+          min-height: 90px;
+          margin-top: 12px;
+        }
+
+        input:focus,
         textarea:focus {
           border-color: #5f7fff;
           box-shadow: 0 0 0 4px rgba(95, 127, 255, 0.12);
@@ -1202,6 +1756,15 @@ export default function Home() {
 
         .secondary:hover {
           background: #d1d5db;
+        }
+
+        .danger {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .danger:hover {
+          background: #fecaca;
         }
 
         .scoreCard {
@@ -1276,7 +1839,8 @@ export default function Home() {
           font-weight: 700;
         }
 
-        .summary {
+        .summary,
+        .saveAnalysisBox {
           margin-top: 22px;
           background: #f3f4f6;
           border-radius: 22px;
@@ -1284,7 +1848,105 @@ export default function Home() {
           line-height: 1.6;
         }
 
+        .saveAnalysisBox input {
+          margin-bottom: 12px;
+        }
+
+        .modalOverlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.58);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+
+        .modal {
+          width: min(760px, 100%);
+          max-height: 88vh;
+          overflow: auto;
+          background: white;
+          border-radius: 30px;
+          padding: 32px;
+          position: relative;
+          box-shadow: 0 28px 90px rgba(15, 23, 42, 0.34);
+        }
+
+        .modalClose {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 42px;
+          height: 42px;
+          padding: 0;
+          border-radius: 999px;
+          background: #f3f4f6;
+          color: #111827;
+          font-size: 24px;
+        }
+
+        .modalText {
+          color: #4b5563;
+          line-height: 1.6;
+          margin-bottom: 22px;
+        }
+
+        .modalForm,
+        .profileEdit {
+          display: grid;
+          gap: 12px;
+        }
+
+        .textButton {
+          background: transparent;
+          color: #3730a3;
+          padding: 12px 0 0;
+          margin-top: 10px;
+        }
+
+        .savedAnalyses {
+          margin-top: 28px;
+        }
+
+        .analysisItem {
+          border: 1px solid #e5e7eb;
+          border-radius: 18px;
+          padding: 16px;
+          margin-top: 12px;
+          background: #f9fafb;
+        }
+
+        .analysisItem strong,
+        .analysisItem span {
+          display: block;
+        }
+
+        .analysisItem span {
+          color: #6b7280;
+          font-size: 13px;
+          font-weight: 700;
+          margin-top: 4px;
+        }
+
+        .analysisItem p {
+          color: #374151;
+          margin-bottom: 0;
+          line-height: 1.5;
+        }
+
+        .emptyText {
+          color: #6b7280;
+          font-weight: 700;
+        }
+
         @media (max-width: 900px) {
+          .topNav {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
           .hero {
             grid-template-columns: 1fr;
             padding: 34px;
@@ -1298,7 +1960,8 @@ export default function Home() {
           .grid,
           .navigation,
           .saveActions,
-          .positionActions {
+          .positionActions,
+          .profileActions {
             grid-template-columns: 1fr;
           }
 
