@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const STORAGE_KEY = "skillsHeatmapProfileV1";
 
 const SKILL_LEVELS = [
   "Nevyplnené",
@@ -112,13 +114,30 @@ function getLevelLabel(question, value) {
 export default function Home() {
   const [answers, setAnswers] = useState(createInitialAnswers());
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [jobUrl, setJobUrl] = useState("");
   const [jobText, setJobText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const currentQuestion = QUESTIONS[currentIndex];
   const progress = Math.round(((currentIndex + 1) / QUESTIONS.length) * 100);
+
+  useEffect(() => {
+    const savedProfile = window.localStorage.getItem(STORAGE_KEY);
+
+    if (savedProfile) {
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        setAnswers({
+          ...createInitialAnswers(),
+          ...parsedProfile
+        });
+        setProfileSaved(true);
+      } catch {
+        setProfileSaved(false);
+      }
+    }
+  }, []);
 
   const answeredCount = useMemo(() => {
     return Object.values(answers).filter((value) => value > 0).length;
@@ -129,6 +148,7 @@ export default function Home() {
       ...previous,
       [currentQuestion.skill]: Number(value)
     }));
+    setResult(null);
   }
 
   function goPrevious() {
@@ -137,6 +157,28 @@ export default function Home() {
 
   function goNext() {
     setCurrentIndex((index) => Math.min(QUESTIONS.length - 1, index + 1));
+  }
+
+  function saveSkillProfile() {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+    setProfileSaved(true);
+    alert("Skill profil bol uložený v tomto prehliadači.");
+  }
+
+  function resetSkillProfile() {
+    const confirmed = confirm("Naozaj chceš vymazať uložený skill profil?");
+    if (!confirmed) return;
+
+    const emptyProfile = createInitialAnswers();
+    setAnswers(emptyProfile);
+    window.localStorage.removeItem(STORAGE_KEY);
+    setProfileSaved(false);
+    setResult(null);
+  }
+
+  function clearPositionText() {
+    setJobText("");
+    setResult(null);
   }
 
   async function handleAnalyze() {
@@ -159,8 +201,8 @@ export default function Home() {
       return;
     }
 
-    if (!jobUrl && !jobText) {
-      alert("Vlož link alebo text pracovnej ponuky.");
+    if (!jobText) {
+      alert("Vlož text pracovnej ponuky.");
       setLoading(false);
       return;
     }
@@ -173,7 +215,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           selectedSkills,
-          jobUrl,
+          jobUrl: "",
           jobText
         })
       });
@@ -198,26 +240,42 @@ export default function Home() {
     <>
       <main className="page">
         <section className="hero">
-          <div className="badge">Skill checker bez plateného AI API</div>
+          <div className="badge">Skill profil + porovnanie pracovných ponúk</div>
           <h1>Skills Heatmap</h1>
           <p>
-            Vyplň svoj skill profil cez jednoduchý dotazník, vlož pracovnú
-            ponuku a aplikácia porovná tvoju úroveň s požiadavkami pozície.
+            Raz si vyplň svoj skill profil, ulož si ho a potom porovnávaj
+            rôzne pracovné ponuky bez toho, aby si dotazník vypĺňal znova.
           </p>
         </section>
 
         <section className="card intro">
-          <h2>1. Skill dotazník</h2>
+          <h2>1. Tvoj skill profil</h2>
           <p>
-            Zobrazujeme vždy jeden skill. Hodnoť reálne. Ak si dáš všade expert,
-            výsledok nebude mať hodnotu.
+            Hodnoť reálne. Ak si všade nastavíš expert, výsledok bude pekný, ale
+            nepoužiteľný. Cieľ je zistiť, kde máš reálnu zhodu a kde gap.
           </p>
-          <div className="progressMeta">
-            <span>Otázka {currentIndex + 1} / {QUESTIONS.length}</span>
+
+          <div className="profileStatus">
+            <span>
+              {profileSaved ? "Profil uložený v prehliadači" : "Profil zatiaľ nie je uložený"}
+            </span>
             <span>Vyplnené skills: {answeredCount}</span>
           </div>
+
+          <div className="progressMeta">
+            <span>Otázka {currentIndex + 1} / {QUESTIONS.length}</span>
+            <span>{progress}% dotazníka</span>
+          </div>
+
           <div className="progressBar">
             <div style={{ width: `${progress}%` }} />
+          </div>
+
+          <div className="saveActions">
+            <button onClick={saveSkillProfile}>Uložiť môj skill profil</button>
+            <button className="secondary" onClick={resetSkillProfile}>
+              Vymazať profil
+            </button>
           </div>
         </section>
 
@@ -231,7 +289,7 @@ export default function Home() {
             <h2>{currentQuestion.skill}</h2>
             <p>
               {currentQuestion.type === "language"
-                ? "Označ svoju jazykovú úroveň na škále."
+                ? "Označ svoju jazykovú úroveň."
                 : "Označ svoju aktuálnu úroveň v tejto oblasti."}
             </p>
 
@@ -267,30 +325,32 @@ export default function Home() {
         </section>
 
         <section className="card">
-          <h2>2. Vlož pracovnú ponuku</h2>
-
-          <div className="formBlock">
-            <label>Link na pracovnú pozíciu</label>
-            <input
-              type="url"
-              placeholder="https://www.jobs.cz/prace/..."
-              value={jobUrl}
-              onChange={(event) => setJobUrl(event.target.value)}
-            />
-          </div>
+          <h2>2. Porovnaj pracovnú ponuku</h2>
+          <p className="helperText">
+            Sem vlož text pracovnej ponuky. Potom môžeš text ľubovoľne meniť a
+            opakovane porovnávať nové pozície s uloženým skill profilom.
+          </p>
 
           <div className="formBlock">
             <label>Text pracovnej ponuky</label>
             <textarea
-              placeholder="Odporúčané pre istý výsledok: vlož sem text pracovnej ponuky. Linky z Jobs.cz môžu byť blokované."
+              placeholder="Vlož sem celý text pracovnej ponuky..."
               value={jobText}
-              onChange={(event) => setJobText(event.target.value)}
+              onChange={(event) => {
+                setJobText(event.target.value);
+                setResult(null);
+              }}
             />
           </div>
 
-          <button onClick={handleAnalyze} disabled={loading}>
-            {loading ? "Analyzujem..." : "Analyzovať zhodu"}
-          </button>
+          <div className="positionActions">
+            <button onClick={handleAnalyze} disabled={loading}>
+              {loading ? "Analyzujem..." : "Analyzovať zhodu"}
+            </button>
+            <button className="secondary" onClick={clearPositionText}>
+              Vyčistiť text pozície
+            </button>
+          </div>
         </section>
 
         {result && (
@@ -395,11 +455,13 @@ export default function Home() {
           margin-bottom: 28px;
         }
 
-        .intro p {
+        .intro p,
+        .helperText {
           color: #4b5563;
           line-height: 1.6;
         }
 
+        .profileStatus,
         .progressMeta {
           display: flex;
           justify-content: space-between;
@@ -407,6 +469,13 @@ export default function Home() {
           font-weight: 800;
           color: #4b5563;
           margin-top: 18px;
+        }
+
+        .profileStatus span:first-child {
+          background: #ecfdf5;
+          color: #166534;
+          padding: 10px 14px;
+          border-radius: 999px;
         }
 
         .progressBar {
@@ -422,6 +491,15 @@ export default function Home() {
           background: #111827;
           border-radius: 999px;
           transition: width 0.3s ease;
+        }
+
+        .saveActions,
+        .positionActions,
+        .navigation {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-top: 24px;
         }
 
         .questionTop {
@@ -485,22 +563,6 @@ export default function Home() {
           text-align: center;
         }
 
-        .navigation {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
-          margin-top: 30px;
-        }
-
-        .secondary {
-          background: #e5e7eb;
-          color: #111827;
-        }
-
-        .secondary:hover {
-          background: #d1d5db;
-        }
-
         .formBlock {
           margin-bottom: 22px;
         }
@@ -523,7 +585,7 @@ export default function Home() {
         }
 
         textarea {
-          min-height: 170px;
+          min-height: 210px;
           resize: vertical;
         }
 
@@ -551,6 +613,15 @@ export default function Home() {
         button:disabled {
           background: #9ca3af;
           cursor: not-allowed;
+        }
+
+        .secondary {
+          background: #e5e7eb;
+          color: #111827;
+        }
+
+        .secondary:hover {
+          background: #d1d5db;
         }
 
         .scoreCard {
@@ -647,8 +718,15 @@ export default function Home() {
           }
 
           .grid,
-          .navigation {
+          .navigation,
+          .saveActions,
+          .positionActions {
             grid-template-columns: 1fr;
+          }
+
+          .profileStatus,
+          .progressMeta {
+            flex-direction: column;
           }
 
           .scaleLabels {
