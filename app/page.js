@@ -2,26 +2,163 @@
 
 import { useState } from "react";
 
+const LEVELS = [
+  "Úplný začiatočník",
+  "Začiatočník",
+  "Stredne pokročilý",
+  "Pokročilý",
+  "Expert"
+];
+
+const SKILL_GROUPS = [
+  {
+    title: "Project Management",
+    skills: [
+      "Project planning",
+      "Roadmap planning",
+      "Risk management",
+      "Budgeting",
+      "Reporting",
+      "Stakeholder management",
+      "Prioritization",
+      "Project documentation",
+      "Project coordination",
+      "Resource planning"
+    ]
+  },
+  {
+    title: "Agile / Methods",
+    skills: [
+      "Agile",
+      "Scrum",
+      "Kanban",
+      "Sprint planning",
+      "Retrospectives",
+      "Backlog management",
+      "Waterfall",
+      "Change management",
+      "Process improvement",
+      "Project governance"
+    ]
+  },
+  {
+    title: "Tools",
+    skills: [
+      "Jira",
+      "Confluence",
+      "MS Project",
+      "Asana",
+      "Trello",
+      "Notion",
+      "MS Excel",
+      "Power BI",
+      "Slack",
+      "Microsoft Teams"
+    ]
+  },
+  {
+    title: "Soft skills",
+    skills: [
+      "Communication",
+      "Leadership",
+      "Teamwork",
+      "Problem solving",
+      "Time management",
+      "Negotiation",
+      "Presentation skills",
+      "Conflict resolution",
+      "Decision making",
+      "Critical thinking"
+    ]
+  },
+  {
+    title: "Business skills",
+    skills: [
+      "Business analysis",
+      "KPI tracking",
+      "Vendor management",
+      "Customer orientation",
+      "Strategic thinking",
+      "Financial awareness",
+      "Data-driven decision making",
+      "Requirements gathering",
+      "Documentation",
+      "Quality management"
+    ]
+  },
+  {
+    title: "Languages",
+    skills: [
+      "English B1",
+      "English B2",
+      "English C1",
+      "Czech",
+      "Slovak",
+      "German A2",
+      "German B1",
+      "German B2"
+    ]
+  }
+];
+
+function createInitialSkills() {
+  const result = {};
+  SKILL_GROUPS.forEach((group) => {
+    group.skills.forEach((skill) => {
+      result[skill] = "";
+    });
+  });
+  return result;
+}
+
 export default function Home() {
-  const [cvFile, setCvFile] = useState(null);
+  const [skills, setSkills] = useState(createInitialSkills());
   const [jobUrl, setJobUrl] = useState("");
   const [jobText, setJobText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
+  function updateSkill(skill, level) {
+    setSkills((previous) => ({
+      ...previous,
+      [skill]: level
+    }));
+  }
+
   async function handleAnalyze() {
     setLoading(true);
     setResult(null);
 
-    const formData = new FormData();
-    if (cvFile) formData.append("cv", cvFile);
-    formData.append("jobUrl", jobUrl);
-    formData.append("jobText", jobText);
+    const selectedSkills = Object.entries(skills)
+      .filter(([, level]) => level)
+      .map(([skill, level]) => ({
+        skill,
+        level
+      }));
+
+    if (selectedSkills.length < 5) {
+      alert("Vyplň aspoň 5 skills, inak analýza nebude mať zmysel.");
+      setLoading(false);
+      return;
+    }
+
+    if (!jobUrl && !jobText) {
+      alert("Vlož link alebo text pracovnej ponuky.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
-        body: formData
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          selectedSkills,
+          jobUrl,
+          jobText
+        })
       });
 
       const data = await response.json();
@@ -44,27 +181,52 @@ export default function Home() {
     <>
       <main className="page">
         <section className="hero">
-          <div className="badge">AI CV checker pre študentov</div>
+          <div className="badge">AI skill checker pre projektových manažérov</div>
           <h1>Skills Heatmap</h1>
           <p>
-            Nahraj CV, vlož link na pracovnú pozíciu a aplikácia porovná tvoje
-            skills s požiadavkami konkrétnej ponuky.
+            Vyplň svoj skill profil na 5-stupňovej škále, vlož pracovnú ponuku
+            a zisti, ako dobre sa hodíš na konkrétnu pozíciu.
           </p>
         </section>
 
+        <section className="card intro">
+          <h2>1. Vyplň svoj skill profil</h2>
+          <p>
+            Pri každom skille vyber svoju reálnu úroveň. Neprikrášľuj to.
+            Výsledok bude použiteľný len vtedy, keď vstup nebude sebaklam.
+          </p>
+        </section>
+
+        <section className="skillsWrapper">
+          {SKILL_GROUPS.map((group) => (
+            <div className="skillGroup" key={group.title}>
+              <h3>{group.title}</h3>
+
+              {group.skills.map((skill) => (
+                <div className="skillRow" key={skill}>
+                  <label>{skill}</label>
+                  <select
+                    value={skills[skill]}
+                    onChange={(event) => updateSkill(skill, event.target.value)}
+                  >
+                    <option value="">Nevyplnené</option>
+                    {LEVELS.map((level) => (
+                      <option value={level} key={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          ))}
+        </section>
+
         <section className="card">
-          <div className="formBlock">
-            <label>1. Nahraj CV vo formáte PDF</label>
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={(event) => setCvFile(event.target.files[0])}
-            />
-            {cvFile && <small>Vybraný súbor: {cvFile.name}</small>}
-          </div>
+          <h2>2. Vlož pracovnú ponuku</h2>
 
           <div className="formBlock">
-            <label>2. Vlož link na pracovnú pozíciu</label>
+            <label>Link na pracovnú pozíciu</label>
             <input
               type="url"
               placeholder="https://www.jobs.cz/prace/..."
@@ -74,9 +236,9 @@ export default function Home() {
           </div>
 
           <div className="formBlock">
-            <label>3. Záložne vlož text pracovnej ponuky</label>
+            <label>Text pracovnej ponuky</label>
             <textarea
-              placeholder="Ak link nepôjde načítať, vlož sem text pracovnej ponuky."
+              placeholder="Odporúčané pre testovanie: vlož sem text pracovnej ponuky. Linky z Jobs.cz môžu byť technicky blokované."
               value={jobText}
               onChange={(event) => setJobText(event.target.value)}
             />
@@ -97,21 +259,21 @@ export default function Home() {
 
             <div className="grid">
               <div className="resultBox">
-                <h3>Zhodné skills</h3>
+                <h3>Silné stránky</h3>
                 {result.matchedSkills?.map((skill) => (
                   <span className="pill good" key={skill}>{skill}</span>
                 ))}
               </div>
 
               <div className="resultBox">
-                <h3>Chýbajúce skills</h3>
+                <h3>Slabé alebo chýbajúce skills</h3>
                 {result.missingSkills?.map((skill) => (
                   <span className="pill bad" key={skill}>{skill}</span>
                 ))}
               </div>
 
               <div className="resultBox">
-                <h3>Odporúčania do CV</h3>
+                <h3>Odporúčania</h3>
                 {result.cvRecommendations?.map((item) => (
                   <p className="recommendation" key={item}>{item}</p>
                 ))}
@@ -139,7 +301,7 @@ export default function Home() {
         }
 
         .page {
-          max-width: 1150px;
+          max-width: 1180px;
           margin: 0 auto;
           padding: 40px 20px;
         }
@@ -172,7 +334,7 @@ export default function Home() {
         }
 
         .hero p {
-          max-width: 760px;
+          max-width: 780px;
           color: #d1d5db;
           font-size: 19px;
           line-height: 1.7;
@@ -188,41 +350,81 @@ export default function Home() {
           margin-bottom: 28px;
         }
 
-        .formBlock {
-          margin-bottom: 22px;
+        .intro p {
+          color: #4b5563;
+          line-height: 1.6;
+          margin-bottom: 0;
+        }
+
+        .skillsWrapper {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 22px;
+          margin-bottom: 28px;
+        }
+
+        .skillGroup {
+          background: white;
+          border-radius: 28px;
+          padding: 26px;
+          box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        .skillGroup h3 {
+          margin-top: 0;
+          margin-bottom: 18px;
+        }
+
+        .skillRow {
+          display: grid;
+          grid-template-columns: 1fr 230px;
+          gap: 14px;
+          align-items: center;
+          padding: 10px 0;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .skillRow:last-child {
+          border-bottom: 0;
         }
 
         label {
           display: block;
           font-weight: 800;
+        }
+
+        .skillRow label {
+          font-size: 14px;
+        }
+
+        .formBlock {
+          margin-bottom: 22px;
+        }
+
+        .formBlock label {
           margin-bottom: 10px;
         }
 
-        small {
-          display: block;
-          margin-top: 8px;
-          color: #6b7280;
-          font-weight: 700;
-        }
-
         input,
-        textarea {
+        textarea,
+        select {
           width: 100%;
           border: 1px solid #d1d5db;
           border-radius: 16px;
-          padding: 15px 16px;
+          padding: 13px 14px;
           font-size: 15px;
           outline: none;
           background: white;
         }
 
         textarea {
-          min-height: 150px;
+          min-height: 170px;
           resize: vertical;
         }
 
         input:focus,
-        textarea:focus {
+        textarea:focus,
+        select:focus {
           border-color: #111827;
         }
 
@@ -327,7 +529,7 @@ export default function Home() {
           line-height: 1.6;
         }
 
-        @media (max-width: 850px) {
+        @media (max-width: 900px) {
           .hero {
             padding: 34px;
           }
@@ -336,7 +538,12 @@ export default function Home() {
             font-size: 42px;
           }
 
+          .skillsWrapper,
           .grid {
+            grid-template-columns: 1fr;
+          }
+
+          .skillRow {
             grid-template-columns: 1fr;
           }
         }
