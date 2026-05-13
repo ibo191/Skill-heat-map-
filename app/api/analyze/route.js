@@ -31,26 +31,6 @@ const RESULT_SCHEMA = {
   ]
 };
 
-async function extractPdfText(file) {
-  if (!file) return "";
-
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const pdfParseModule = await import("pdf-parse");
-    const pdfParse = pdfParseModule.default || pdfParseModule;
-    const parsed = await pdfParse(buffer);
-
-    return (parsed.text || "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 18000);
-  } catch (error) {
-    console.error("PDF parsing error:", error);
-    return "";
-  }
-}
-
 async function extractJobText(jobUrl, fallbackText) {
   if (fallbackText && fallbackText.trim().length > 80) {
     return fallbackText.trim().slice(0, 18000);
@@ -85,22 +65,6 @@ async function extractJobText(jobUrl, fallbackText) {
   }
 }
 
-function fallbackResult() {
-  return {
-    matchScore: 0,
-    trafficLight: "Nedá sa vyhodnotiť",
-    matchedSkills: [],
-    missingSkills: [],
-    cvRecommendations: [
-      "Nepodarilo sa prečítať CV alebo pracovnú ponuku.",
-      "Skús vložiť text pracovnej ponuky ručne do záložného poľa.",
-      "Skontroluj, či je CV naozaj PDF a nie obrázok alebo sken bez textu."
-    ],
-    summary:
-      "Analýza nemala dostatok textových dát. Pre demo odporúčame vložiť text pracovnej ponuky ručne."
-  };
-}
-
 export async function POST(request) {
   try {
     if (!process.env.OPENAI_API_KEY) {
@@ -110,33 +74,46 @@ export async function POST(request) {
       );
     }
 
-    const formData = await request.formData();
-    const cv = formData.get("cv");
-    const jobUrl = formData.get("jobUrl");
-    const jobTextFallback = formData.get("jobText");
+    const body = await request.json();
 
-    const cvText = await extractPdfText(cv);
+    const selectedSkills = body.selectedSkills || [];
+    const jobUrl = body.jobUrl || "";
+    const jobTextFallback = body.jobText || "";
+
     const jobText = await extractJobText(jobUrl, jobTextFallback);
 
-    if (!cvText || !jobText) {
-      return Response.json(fallbackResult());
+    if (!selectedSkills.length || !jobText) {
+      return Response.json(
+        {
+          error:
+            "Chýbajú skills alebo text pracovnej ponuky. Vlož aspoň niekoľko skills a text ponuky."
+        },
+        { status: 400 }
+      );
     }
 
+    const skillProfile = selectedSkills
+      .map((item) => `${item.skill}: ${item.level}`)
+      .join("\n");
+
     const prompt = `
-Porovnaj CV kandidáta s pracovnou ponukou.
+Porovnaj skill profil kandidáta s pracovnou ponukou.
 
 Dôležité pravidlá:
 - Nepredstieraj istotu prijatia kandidáta.
-- Hodnoť iba zhodu medzi CV a požiadavkami pracovnej ponuky.
+- Hodnoť iba zhodu medzi skill profilom a požiadavkami pracovnej ponuky.
 - Match score má byť 0 až 100.
 - trafficLight má byť jedna z hodnôt: "Silná zhoda", "Stredná zhoda", "Slabá zhoda".
-- matchedSkills vypíš iba skills, ktoré sú zjavne v CV a zároveň relevantné pre ponuku.
-- missingSkills vypíš skills alebo požiadavky z ponuky, ktoré v CV chýbajú alebo sú slabé.
-- cvRecommendations musia byť konkrétne návrhy, čo doplniť do CV.
-- Odpovedaj slovensky alebo česky podľa vstupu používateľa.
+- Skills s úrovňou "Expert" alebo "Pokročilý" ber ako silnú zhodu.
+- Skills s úrovňou "Stredne pokročilý" ber ako čiastočnú zhodu.
+- Skills s úrovňou "Začiatočník" alebo "Úplný začiatočník" ber ako slabú zhodu.
+- matchedSkills vypíš silné alebo dostatočné zhody.
+- missingSkills vypíš chýbajúce skills alebo skills, kde je úroveň príliš nízka.
+- cvRecommendations majú byť konkrétne odporúčania, čo sa naučiť alebo čo doplniť do CV.
+- Odpovedaj slovensky alebo česky podľa pracovnej ponuky.
 
-CV TEXT:
-${cvText}
+SKILL PROFIL KANDIDÁTA:
+${skillProfile}
 
 PRACOVNÁ PONUKA:
 ${jobText}
