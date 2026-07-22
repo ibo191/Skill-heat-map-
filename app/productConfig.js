@@ -1,7 +1,7 @@
 export const PRODUCT = {
   name: "SkillHeat",
   preorderUrl: "https://www.buymeacoffee.com/instastrateg",
-  founderPrice: "â‚¬19",
+  founderPrice: "€19",
   founderSlots: 50
 };
 
