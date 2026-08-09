@@ -105,9 +105,40 @@ export default function Home(){
     if(!finished||analysis||analysisError||analyzing||!hasJobOffer||selectedSkills.length!==DEMO_SKILLS.length)return;
     runAnalysis();
   },[finished,analysis,analysisError,analyzing,hasJobOffer,selectedSkills]);
+  useEffect(()=>{
+    const elements=[...document.querySelectorAll(".reveal")];
+    const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if(reduced){
+      elements.forEach(element=>element.classList.add("isVisible"));
+      return;
+    }
+
+    const observer=new IntersectionObserver((entries)=>{
+      entries.forEach((entry)=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add("isVisible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.16,rootMargin:"0px 0px -8% 0px"});
+
+    elements.forEach(element=>observer.observe(element));
+
+    return ()=>observer.disconnect();
+  },[questionnaireStarted,finished,analysis]);
   function rate(value){const next=[...answers];next[index]=value;setAnswers(next)}
   function next(){if(index<DEMO_SKILLS.length-1)setIndex(index+1);else setFinished(true)}
-  function startQuestionnaire(event){event.preventDefault();setQuestionnaireStarted(true);setFinished(false);setAnalysis(null);setAnalysisError("");setIndex(0);setAnswers(Array(DEMO_SKILLS.length).fill(null))}
+  function startQuestionnaire(event){
+    event.preventDefault();
+    const firstUnanswered=answers.findIndex(value=>value===null);
+    setQuestionnaireStarted(true);
+    setFinished(firstUnanswered===-1);
+    setAnalysis(null);
+    setAnalysisError("");
+    setIndex(firstUnanswered===-1?0:firstUnanswered);
+  }
+  function editAnswers(){setQuestionnaireStarted(true);setFinished(false);setAnalysis(null);setAnalysisError("");setIndex(0)}
   function reset(){setAnswers(Array(DEMO_SKILLS.length).fill(null));setIndex(0);setQuestionnaireStarted(false);setFinished(false);setJobUrl("");setJobText("");setAnalysis(null);setAnalysisError("");window.localStorage.removeItem("skillheat-demo")}
   async function runAnalysis(){
     setAnalyzing(true);
@@ -128,11 +159,11 @@ export default function Home(){
   return <>
     <header id="top" className="shell nav">
       <a className="logo" href="#top" aria-label="SkillHeat home"><span className="logoMark">SH</span>{PRODUCT.name}</a>
-      <nav className="navLinks desktopNav" aria-label="Primary navigation"><a href="#how">How it works</a><a href="#demo">Try demo</a><a href="#founder">Roadmap</a><a className="button" href="#founder">Get founder access</a></nav>
-      <details className="mobileMenu"><summary aria-label="Open navigation">Menu</summary><nav aria-label="Mobile navigation"><a href="#how">How it works</a><a href="#demo">Try demo</a><a href="#founder">Roadmap</a><a href="#founder">Founder access</a></nav></details>
+      <nav className="navLinks desktopNav" aria-label="Primary navigation"><a href="#how">How it works</a><a href="#demo">Try demo</a><a href="/profile">Dashboard</a><a href="#founder">Roadmap</a><a className="button" href="#founder">Get founder access</a></nav>
+      <details className="mobileMenu"><summary aria-label="Open navigation">Menu</summary><nav aria-label="Mobile navigation"><a href="#how">How it works</a><a href="#demo">Try demo</a><a href="/profile">Dashboard</a><a href="#founder">Roadmap</a><a href="#founder">Founder access</a></nav></details>
     </header>
     <main>
-      <section className="shell hero">
+      <section className="shell hero reveal">
         <div>
           <span className="eyebrow">Early access for project people</span>
           <h1>See the skills behind your next move.</h1>
@@ -140,22 +171,22 @@ export default function Home(){
           <div className="heroActions"><a className="button lime" href="#demo">Map my skills — free</a><a className="button outline" href="#founder">See founder offer</a></div>
           <p className="micro">No CV upload · 3-minute preview · Your answers stay in your browser</p>
         </div>
-        <div className="preview" aria-label="Example skill heatmap">
+        <div className="preview reveal" aria-label="Example skill heatmap">
           <div className="previewTop"><div><strong>Your readiness map</strong><br/><span>Project manager · sample</span></div><div className="scoreRing"><strong>78%</strong></div></div>
           <div className="heatGrid">{DEMO_SKILLS.slice(0,8).map((s,i)=><div key={s[0]} className={`heatCell level${[4,3,5,3,4,2,4,3][i]}`}>{s[0]}</div>)}</div>
         </div>
       </section>
-      <div className="socialProof"><div className="shell proofInner"><strong>Built for aspiring & growing project professionals</strong><span>PM fundamentals</span><span>Agile delivery</span><span>People skills</span><span>Career readiness</span></div></div>
+      <div className="socialProof reveal"><div className="shell proofInner"><strong>Built for aspiring & growing project professionals</strong><span>PM fundamentals</span><span>Agile delivery</span><span>People skills</span><span>Career readiness</span></div></div>
 
-      <section id="how" className="shell section">
+      <section id="how" className="shell section reveal">
         <div className="sectionHead"><span className="eyebrow">Less guessing, more direction</span><h2>A career compass you can actually use.</h2><p>SkillHeat translates your experience into a visual map and a practical next step — without pretending one score defines your career.</p></div>
-        <div className="steps">{[["01","Rate what you can do","Answer short, concrete questions across project management, agile and people skills."],["02","See your heatmap","Spot strengths, hidden gaps and the areas that deserve your attention first."],["03","Prepare your next move","The full release will match your map to roles and build a focused growth plan."]].map(x=><article className="step" key={x[0]}><span className="stepNo">{x[0]}</span><h3>{x[1]}</h3><p>{x[2]}</p></article>)}</div>
+        <div className="steps">{[["01","Rate what you can do","Answer short, concrete questions across project management, agile and people skills."],["02","See your heatmap","Spot strengths, hidden gaps and the areas that deserve your attention first."],["03","Prepare your next move","The full release will match your map to roles and build a focused growth plan."]].map(x=><article className="step reveal" key={x[0]}><span className="stepNo">{x[0]}</span><h3>{x[1]}</h3><p>{x[2]}</p></article>)}</div>
       </section>
 
       <section id="demo" className="shell section">
-        <div className="demoWrap">
+        <div className="demoWrap reveal">
           <div className="demoHeader"><div><span className="eyebrow">Interactive preview</span><h2>Your first skill signal</h2></div><p>Rate 12 essential capabilities. This preview shows how SkillHeat turns self-reflection into a useful visual.</p></div>
-          {!questionnaireStarted ? <form className="jobStart" onSubmit={startQuestionnaire}>
+          {!questionnaireStarted ? <form className="jobStart reveal" onSubmit={startQuestionnaire}>
             <div>
               <span className="eyebrow">Start with a job offer</span>
               <h3>Add the role you want to test</h3>
@@ -169,14 +200,14 @@ export default function Home(){
               <span>Paste the job description</span>
               <textarea value={jobText} onChange={event=>setJobText(event.target.value)} rows={8} placeholder="Paste responsibilities, requirements and tools from the job post." />
             </label>
-            <button className="button" type="submit" disabled={!hasJobOffer}>Start questionnaire</button>
+            <button className="button" type="submit" disabled={!hasJobOffer}>{selectedSkills.length===DEMO_SKILLS.length?"Use saved answers":"Start questionnaire"}</button>
           </form> : !finished ? <>
             <div className="progress"><div style={{width:`${((index+1)/DEMO_SKILLS.length)*100}%`}}/></div>
-            <div className="question"><span className="questionMeta">{current[2]} · {index+1} of {DEMO_SKILLS.length}</span><h3>{current[0]}</h3><p>{current[1]}</p><div className="rating" role="radiogroup" aria-label={`Rate ${current[0]}`}>{LABELS.map((label,i)=><button type="button" role="radio" aria-checked={answers[index]===i} key={label} className={`rate ${answers[index]===i?"active":""}`} onClick={()=>rate(i)}><strong>{i}</strong><span>{label}</span></button>)}</div><div className="scaleHint"><span>Not confident yet</span><span>Highly confident</span></div><div className="demoNav"><button className="button outline" disabled={index===0} onClick={()=>setIndex(index-1)}>Back</button><button className="button" disabled={answers[index]===null} onClick={next}>{index===DEMO_SKILLS.length-1?"Show my map":"Next"}</button></div></div>
+            <div className="question reveal"><span className="questionMeta">{current[2]} · {index+1} of {DEMO_SKILLS.length}</span><h3>{current[0]}</h3><p>{current[1]}</p><div className="rating" role="radiogroup" aria-label={`Rate ${current[0]}`}>{LABELS.map((label,i)=><button type="button" role="radio" aria-checked={answers[index]===i} key={label} className={`rate ${answers[index]===i?"active":""}`} onClick={()=>rate(i)}><strong>{i}</strong><span>{label}</span></button>)}</div><div className="scaleHint"><span>Not confident yet</span><span>Highly confident</span></div><div className="demoNav"><button className="button outline" disabled={index===0} onClick={()=>setIndex(index-1)}>Back</button><button className="button" disabled={answers[index]===null} onClick={next}>{index===DEMO_SKILLS.length-1?"Show my map":"Next"}</button></div></div>
           </> : <div className="resultPanel">
-            <div className="resultScore"><span className="eyebrow">Your preview result</span><div className="bigScore">{score}%</div><h3>{score>=75?"Strong foundation":score>=50?"Promising foundation":"A clear place to start"}</h3><p>You rated {answered} core skills. The score is a reflection prompt, not a hiring verdict.</p><button className="button outline" onClick={reset}>Retake preview</button></div>
-            <div className="resultMap"><h3>Your project skill heatmap</h3><p>Darker cells show areas where you feel more capable today. Every tile also shows your rating.</p><div className="heatLegend" aria-label="Heatmap legend"><span className="level1">1</span><span className="level2">2</span><span className="level3">3</span><span className="level4">4</span><span className="level5">5</span></div><div className="heatGrid">{DEMO_SKILLS.map((s,i)=><div className={`heatCell level${Math.max(1,answers[i]??0)}`} key={s[0]}><span>{s[0]}</span><strong>{answers[i]??0}/5</strong></div>)}</div><div className="locked"><span className="lock">↗</span><span><strong>Full role match & growth plan</strong><br/>Reserved for founder release</span></div></div>
-            <form className="jobMatch" onSubmit={analyzeJob}>
+            <div className="resultScore reveal"><span className="eyebrow">Your preview result</span><div className="bigScore">{score}%</div><h3>{score>=75?"Strong foundation":score>=50?"Promising foundation":"A clear place to start"}</h3><p>You rated {answered} core skills. Your answers are saved in this browser, so changing the job description will reuse them.</p><div className="resultActions"><button className="button outline" onClick={editAnswers}>Edit answers</button><button className="button outline" onClick={reset}>Reset all</button></div></div>
+            <div className="resultMap reveal"><h3>Your project skill heatmap</h3><p>Darker cells show areas where you feel more capable today. Every tile also shows your rating.</p><div className="heatLegend" aria-label="Heatmap legend"><span className="level1">1</span><span className="level2">2</span><span className="level3">3</span><span className="level4">4</span><span className="level5">5</span></div><div className="heatGrid">{DEMO_SKILLS.map((s,i)=><div className={`heatCell level${Math.max(1,answers[i]??0)}`} key={s[0]}><span>{s[0]}</span><strong>{answers[i]??0}/5</strong></div>)}</div><div className="locked"><span className="lock">↗</span><span><strong>Full role match & growth plan</strong><br/>Reserved for founder release</span></div></div>
+            <form className="jobMatch reveal" onSubmit={analyzeJob}>
               <div>
                 <span className="eyebrow">Available now</span>
                 <h3>Your role match</h3>
@@ -201,7 +232,7 @@ export default function Home(){
         </div>
       </section>
 
-      <section id="founder" className="shell section"><div className="presale"><div><span className="eyebrow">Founder pre-sale</span><h2>Help shape the tool you’d want to use.</h2><p>This is an early product preview, not the finished platform. Founder members fund the next build and get the complete release at its lowest planned price.</p><p><strong>Next release:</strong> complete skill library, role matching, saved progress, personal growth plans and CV-ready evidence prompts.</p></div><aside className="offer"><span>Founder access · one-time</span><div className="price">{PRODUCT.founderPrice}</div><small>Planned regular price: €49</small><ul><li>Full product when released</li><li>All future v1 updates</li><li>Vote on the roadmap</li><li>Founder badge & early access</li></ul><a className="button lime" href={PRODUCT.preorderUrl} target="_blank" rel="noreferrer">Reserve founder access</a><p className="micro">Limited to the first {PRODUCT.founderSlots} supporters. Development-stage product; scope may evolve.</p></aside></div></section>
+      <section id="founder" className="shell section reveal"><div className="presale reveal"><div><span className="eyebrow">Founder pre-sale</span><h2>Help shape the tool you’d want to use.</h2><p>This is an early product preview, not the finished platform. Founder members fund the next build and get the complete release at its lowest planned price.</p><p><strong>Next release:</strong> complete skill library, role matching, saved progress, personal growth plans and CV-ready evidence prompts.</p></div><aside className="offer"><span>Founder access · one-time</span><div className="price">{PRODUCT.founderPrice}</div><small>Planned regular price: €49</small><ul><li>Full product when released</li><li>All future v1 updates</li><li>Vote on the roadmap</li><li><a className="badgeCheckout" href="/profile?checkout=developer">Developer badge registration + checkout</a></li></ul><a className="button lime" href="/profile?checkout=developer">Reserve founder access</a><p className="micro">Limited to the first {PRODUCT.founderSlots} supporters. Development-stage product; scope may evolve.</p></aside></div></section>
       {FEATURES.accounts && <a href="/profile">My profile</a>}
     </main>
     <footer id="privacy" className="shell"><span>© 2026 {PRODUCT.name}. A student agile product experiment.</span><span>Built transparently · Answers are stored only in this browser.</span></footer>

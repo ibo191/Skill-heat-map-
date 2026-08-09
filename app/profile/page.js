@@ -12,6 +12,7 @@ import {
   SESSION_STORAGE_KEY,
   SKILL_LEVELS
 } from "../skillsData";
+import { PRODUCT } from "../productConfig";
 
 export default function ProfilePage() {
   const [currentUserEmail, setCurrentUserEmail] = useState("");
@@ -22,6 +23,10 @@ export default function ProfilePage() {
   const [profileName, setProfileName] = useState("");
   const [profileEmail, setProfileEmail] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [checkoutIntent, setCheckoutIntent] = useState(false);
 
   const [analyses, setAnalyses] = useState([]);
 
@@ -45,6 +50,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const users = getUsers();
     const session = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    setCheckoutIntent(new URLSearchParams(window.location.search).get("checkout") === "developer");
 
     if (session && users[session]) {
       loadUser(users[session]);
@@ -78,6 +84,41 @@ export default function ProfilePage() {
 
     window.localStorage.setItem(SESSION_STORAGE_KEY, email);
     loadUser(user);
+  }
+
+  function handleSignup(event) {
+    event.preventDefault();
+
+    const name = signupName.trim();
+    const email = signupEmail.trim().toLowerCase();
+    const password = signupPassword.trim();
+
+    if (!name || !email || !password) {
+      alert("Name, email and password are required.");
+      return;
+    }
+
+    const users = getUsers();
+
+    if (users[email]) {
+      alert("This email already has a profile. Log in instead.");
+      return;
+    }
+
+    const user = {
+      name,
+      email,
+      password,
+      skillProfile: createInitialAnswers(),
+      analyses: [],
+      badge: checkoutIntent ? "Developer badge" : ""
+    };
+
+    users[email] = user;
+    saveUsers(users);
+    window.localStorage.setItem(SESSION_STORAGE_KEY, email);
+    loadUser(user);
+    setSignupPassword("");
   }
 
   function updateAnswer(skill, value) {
@@ -194,35 +235,65 @@ export default function ProfilePage() {
             <a className="backLink" href="/">← Back to app</a>
           </nav>
 
-          <section className="authCard">
-            <h1>Log in to your profile</h1>
-            <p>
-              Open your saved skill profile, edit your skills and return to saved job analyses.
-            </p>
+          <section className="authCard wideAuth">
+            <div className="authIntro">
+              <div className="badge">{checkoutIntent ? "Developer badge checkout" : "Dashboard access"}</div>
+              <h1>Create your SkillHeat dashboard</h1>
+              <p>
+                Register locally in this browser, keep your skill answers saved and continue to checkout when you are ready.
+              </p>
+            </div>
 
-            <form onSubmit={handleLogin} className="loginForm">
-              <label>Email</label>
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(event) => setLoginEmail(event.target.value)}
-                placeholder="you@example.com"
-              />
+            <div className="authGrid">
+              <form onSubmit={handleSignup} className="loginForm">
+                <h2>Sign up</h2>
+                <label>Name</label>
+                <input
+                  value={signupName}
+                  onChange={(event) => setSignupName(event.target.value)}
+                  placeholder="Your name"
+                />
 
-              <label>Password</label>
-              <input
-                type="password"
-                value={loginPassword}
-                onChange={(event) => setLoginPassword(event.target.value)}
-                placeholder="Password"
-              />
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={signupEmail}
+                  onChange={(event) => setSignupEmail(event.target.value)}
+                  placeholder="you@example.com"
+                />
 
-              <button type="submit">Log in</button>
-            </form>
+                <label>Password</label>
+                <input
+                  type="password"
+                  value={signupPassword}
+                  onChange={(event) => setSignupPassword(event.target.value)}
+                  placeholder="Create password"
+                />
 
-            <p className="smallText">
-              No account yet? Go back to the app and create one from the sign up popup.
-            </p>
+                <button type="submit">{checkoutIntent ? "Create dashboard" : "Create account"}</button>
+              </form>
+
+              <form onSubmit={handleLogin} className="loginForm secondaryAuth">
+                <h2>Log in</h2>
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(event) => setLoginEmail(event.target.value)}
+                  placeholder="you@example.com"
+                />
+
+                <label>Password</label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(event) => setLoginPassword(event.target.value)}
+                  placeholder="Password"
+                />
+
+                <button type="submit">Log in to dashboard</button>
+              </form>
+            </div>
           </section>
         </main>
 
@@ -241,8 +312,8 @@ export default function ProfilePage() {
 
         <section className="profileHero">
           <div>
-            <div className="badge">My profile</div>
-            <h1>{currentUser?.name || "Profile"}</h1>
+            <div className="badge">Dashboard</div>
+            <h1>{currentUser?.name || "Dashboard"}</h1>
             <p>
               Manage your account, edit your saved skills and review saved job comparisons.
             </p>
@@ -253,6 +324,21 @@ export default function ProfilePage() {
             <span>rated skills</span>
           </div>
         </section>
+
+        {checkoutIntent && (
+          <section className="checkoutPanel">
+            <div>
+              <div className="badge darkBadge">Developer badge</div>
+              <h2>Registration is ready</h2>
+              <p>
+                Your local dashboard is created. Continue to checkout to reserve founder access and the developer badge.
+              </p>
+            </div>
+            <a className="checkoutButton" href={PRODUCT.preorderUrl} target="_blank" rel="noreferrer">
+              Continue to checkout
+            </a>
+          </section>
+        )}
 
         <section className="gridTwo">
           <div className="card">
@@ -412,6 +498,45 @@ function SharedStyles() {
       }
       .profileStats strong { display: block; font-size: 52px; }
       .profileStats span { color: #dbeafe; font-weight: 800; }
+      .checkoutPanel {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 22px;
+        align-items: center;
+        margin-bottom: 26px;
+        background: #111827;
+        color: white;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+      }
+      .checkoutPanel h2 {
+        margin: 10px 0 8px;
+        font-size: 30px;
+      }
+      .checkoutPanel p {
+        margin: 0;
+        color: #dbeafe;
+        line-height: 1.6;
+      }
+      .darkBadge {
+        background: rgba(200,240,106,.14);
+        border-color: rgba(200,240,106,.35);
+        color: #d9ff7a;
+      }
+      .checkoutButton {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 0 20px;
+        border-radius: 16px;
+        background: #c8f06a;
+        color: #111827;
+        text-decoration: none;
+        font-weight: 900;
+        white-space: nowrap;
+      }
       .gridTwo {
         display: grid;
         grid-template-columns: 0.8fr 1.2fr;
@@ -428,6 +553,30 @@ function SharedStyles() {
       .authCard {
         max-width: 560px;
         margin: 60px auto;
+      }
+      .wideAuth {
+        max-width: 980px;
+      }
+      .authIntro {
+        max-width: 620px;
+        margin-bottom: 24px;
+      }
+      .authGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .loginForm {
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 24px;
+        background: #ffffff;
+      }
+      .secondaryAuth {
+        background: #f8fafc;
+      }
+      .loginForm h2 {
+        margin: 0 0 4px;
       }
       .authCard h1 { color: #111827; }
       .authCard p, .card p {
@@ -548,8 +697,11 @@ function SharedStyles() {
       @media (max-width: 900px) {
         .profileHero, .topNav { flex-direction: column; align-items: flex-start; }
         h1 { font-size: 40px; }
-        .gridTwo, .sectionHeader, .skillRow {
+        .gridTwo, .sectionHeader, .skillRow, .authGrid, .checkoutPanel {
           grid-template-columns: 1fr;
+        }
+        .checkoutButton {
+          width: 100%;
         }
       }
     `}</style>

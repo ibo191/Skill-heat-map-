@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "next dev",
-    "build": "next build && rm -rf dist && cp -R out dist",
+    "build": "next build && node scripts/build-sites.mjs",
     "start": "next start"
   },
   "dependencies": {
