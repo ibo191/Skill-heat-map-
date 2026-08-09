@@ -18,6 +18,67 @@ const DEMO_SKILLS = [
   ["Data-driven decisions","Use evidence instead of assumptions.","Business"]
 ];
 const LABELS=["Not sure","Beginner","Learning","Capable","Strong","Expert"];
+const JOB_KEYWORDS = {
+  "Project planning":["project planning","planning","project plan","roadmap","milestone","timeline","harmonogram","plán projektu"],
+  "Prioritization":["prioritization","prioritisation","priority","priorities","prioritizace","prioritizovat"],
+  "Risk management":["risk","risk management","risk assessment","mitigation","řízení rizik","rizika"],
+  "Stakeholder management":["stakeholder","stakeholders","stakeholder management","client communication","zainteresované strany"],
+  "Agile delivery":["agile","agile delivery","agile methodology","agilní","iteration","iterative"],
+  "Scrum":["scrum","scrum master","sprint","sprint planning","daily standup"],
+  "Backlog management":["backlog","backlog management","product backlog","správa backlogu"],
+  "Retrospectives":["retrospective","retrospectives","retrospektiva","team improvement"],
+  "Communication":["communication","communication skills","komunikace","presentation","reporting","status report"],
+  "Leadership":["leadership","team leadership","vedení týmu","people management"],
+  "Problem solving":["problem solving","solving problems","root cause","critical thinking","řešení problémů"],
+  "Data-driven decisions":["data-driven","data driven","data analysis","metrics","kpi","power bi","excel","práce s daty"]
+};
+
+function normalizeText(text){
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+
+function keywordExists(jobText,skill){
+  const normalizedJobText=normalizeText(jobText);
+  return (JOB_KEYWORDS[skill]||[skill]).some(keyword=>normalizedJobText.includes(normalizeText(keyword)));
+}
+
+function scoreSkill(levelIndex){
+  if(levelIndex>=5)return 100;
+  if(levelIndex===4)return 85;
+  if(levelIndex===3)return 60;
+  if(levelIndex===2)return 35;
+  if(levelIndex===1)return 15;
+  return 0;
+}
+
+function trafficLightFromScore(score){
+  if(score>=75)return "Strong match";
+  if(score>=45)return "Medium match";
+  return "Weak match";
+}
+
+function analyzeRoleMatch(selectedSkills,jobText){
+  const requiredSkills=selectedSkills.filter(item=>keywordExists(jobText,item.skill));
+  const skillsToEvaluate=requiredSkills.length>0?requiredSkills:selectedSkills.slice(0,12);
+  const matchScore=Math.round(skillsToEvaluate.reduce((sum,item)=>sum+scoreSkill(item.levelIndex),0)/skillsToEvaluate.length);
+  const matchedSkills=skillsToEvaluate.filter(item=>item.levelIndex>=3).map(item=>`${item.skill} — ${item.level}`);
+  const missingSkills=skillsToEvaluate.filter(item=>item.levelIndex<3).map(item=>`${item.skill} — ${item.level}`);
+  const cvRecommendations=[];
+
+  if(missingSkills.length>0)cvRecommendations.push("Focus first on skills that appear in the job description but are rated below intermediate in your profile.");
+  if(matchedSkills.length>0)cvRecommendations.push("Use your strongest matching skills in your CV and cover letter with wording similar to the job description.");
+  cvRecommendations.push("Add evidence to your CV: a project example, measurable result, tool used, team size, deadline, budget or business impact.");
+  if(requiredSkills.length===0)cvRecommendations.push("The system did not detect many known skills in the pasted job text. Paste the full role description for a better result.");
+
+  return {
+    matchScore,
+    trafficLight:trafficLightFromScore(matchScore),
+    matchedSkills,
+    missingSkills,
+    cvRecommendations,
+    summary:requiredSkills.length>0?`The system detected ${requiredSkills.length} relevant skills in the pasted job description and compared them with your questionnaire answers.`:"The system did not detect clear known skills in the pasted job description, so it used your filled skill profile as an orientation estimate. Paste a fuller job description for better accuracy."
+  };
+}
 
 export default function Home(){
   const [index,setIndex]=useState(0);
@@ -32,7 +93,7 @@ export default function Home(){
   const answered=answers.filter(value=>value!==null).length;
   const score=useMemo(()=>Math.round((answers.reduce((a,b)=>a+(b??0),0)/(DEMO_SKILLS.length*5))*100),[answers]);
   const selectedSkills=useMemo(()=>DEMO_SKILLS.map((skill,i)=>answers[i]===null?null:{skill:skill[0],levelIndex:answers[i],level:LABELS[answers[i]]}).filter(Boolean),[answers]);
-  const hasJobOffer=jobUrl.trim().length>0||jobText.trim().length>0;
+  const hasJobOffer=jobText.trim().length>20;
   const current=DEMO_SKILLS[index];
   useEffect(()=>{
     const saved=window.localStorage.getItem("skillheat-demo");
@@ -54,12 +115,8 @@ export default function Home(){
     setAnalysis(null);
 
     try{
-      const response=await fetch("/api/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({selectedSkills,jobUrl,jobText})});
-      const data=await response.json();
-
-      if(!response.ok)throw new Error(data.error||"Job analysis failed.");
-
-      setAnalysis(data);
+      if(!hasJobOffer)throw new Error("Paste the job description text first. A URL can be kept as a reference, but this available version evaluates copied job text.");
+      setAnalysis(analyzeRoleMatch(selectedSkills,jobText));
     }catch(error){
       setAnalysisError(error.message);
     }finally{
@@ -102,14 +159,14 @@ export default function Home(){
             <div>
               <span className="eyebrow">Start with a job offer</span>
               <h3>Add the role you want to test</h3>
-              <p>Paste a job post URL or the full description first. Then answer the questionnaire and SkillHeat will compare your answers with the role requirements.</p>
+              <p>Copy the full job description from the role first. Then answer the questionnaire and SkillHeat will compare your answers with the role requirements.</p>
             </div>
             <label>
-              <span>Job post URL</span>
+              <span>Job post URL, optional</span>
               <input type="url" value={jobUrl} onChange={event=>setJobUrl(event.target.value)} placeholder="https://..." />
             </label>
             <label>
-              <span>Or paste the job description</span>
+              <span>Paste the job description</span>
               <textarea value={jobText} onChange={event=>setJobText(event.target.value)} rows={8} placeholder="Paste responsibilities, requirements and tools from the job post." />
             </label>
             <button className="button" type="submit" disabled={!hasJobOffer}>Start questionnaire</button>
@@ -125,7 +182,7 @@ export default function Home(){
                 <h3>Your role match</h3>
                 <p>SkillHeat compares the job offer you added with the questionnaire you just completed, then gives you a suitability score and practical next steps.</p>
               </div>
-              <div className="jobSource"><strong>Job offer added</strong><span>{jobUrl||`${jobText.trim().slice(0,120)}${jobText.trim().length>120?"...":""}`}</span></div>
+              <div className="jobSource"><strong>Job offer added</strong><span>{`${jobText.trim().slice(0,120)}${jobText.trim().length>120?"...":""}`}</span></div>
               <div className="jobActions"><button className="button" type="submit" disabled={analyzing||selectedSkills.length===0||!hasJobOffer}>{analyzing?"Analyzing...":"Analyze again"}</button><button className="button outline" type="button" onClick={()=>{setQuestionnaireStarted(false);setFinished(false);setAnalysis(null);setAnalysisError("");}}>Change job offer</button></div>
               {analysisError&&<p className="analysisError">{analysisError}</p>}
               {analyzing&&<p className="analysisLoading">Analyzing the job offer against your answers...</p>}
