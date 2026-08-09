@@ -18,28 +18,29 @@ const DEMO_SKILLS = [
   ["Data-driven decisions","Use evidence instead of assumptions.","Business"]
 ];
 const LABELS=["Not sure","Beginner","Learning","Capable","Strong","Expert"];
-const JOB_KEYWORDS = {
-  "Project planning":["project planning","planning","project plan","roadmap","milestone","timeline","harmonogram","plán projektu"],
-  "Prioritization":["prioritization","prioritisation","priority","priorities","prioritizace","prioritizovat"],
-  "Risk management":["risk","risk management","risk assessment","mitigation","řízení rizik","rizika"],
-  "Stakeholder management":["stakeholder","stakeholders","stakeholder management","client communication","zainteresované strany"],
-  "Agile delivery":["agile","agile delivery","agile methodology","agilní","iteration","iterative"],
-  "Scrum":["scrum","scrum master","sprint","sprint planning","daily standup"],
-  "Backlog management":["backlog","backlog management","product backlog","správa backlogu"],
-  "Retrospectives":["retrospective","retrospectives","retrospektiva","team improvement"],
-  "Communication":["communication","communication skills","komunikace","presentation","reporting","status report"],
-  "Leadership":["leadership","team leadership","vedení týmu","people management"],
-  "Problem solving":["problem solving","solving problems","root cause","critical thinking","řešení problémů"],
-  "Data-driven decisions":["data-driven","data driven","data analysis","metrics","kpi","power bi","excel","práce s daty"]
+const JOB_SKILL_MODEL = {
+  "Project planning":{weight:1.25,category:"Delivery",keywords:["project planning","planning","project plan","roadmap","milestone","timeline","schedule","harmonogram","plán projektu"]},
+  "Prioritization":{weight:1.1,category:"Delivery",keywords:["prioritization","prioritisation","priority","priorities","prioritizace","prioritizovat","trade-off"]},
+  "Risk management":{weight:1.2,category:"Control",keywords:["risk","risk management","risk assessment","mitigation","issue management","řízení rizik","rizika"]},
+  "Stakeholder management":{weight:1.25,category:"People",keywords:["stakeholder","stakeholders","stakeholder management","client communication","expectations","zainteresované strany"]},
+  "Agile delivery":{weight:1.15,category:"Agile",keywords:["agile","agile delivery","agile methodology","agilní","iteration","iterative","incremental"]},
+  "Scrum":{weight:1.05,category:"Agile",keywords:["scrum","scrum master","sprint","sprint planning","daily standup","ceremonies"]},
+  "Backlog management":{weight:1.1,category:"Agile",keywords:["backlog","backlog management","product backlog","user stories","správa backlogu"]},
+  "Retrospectives":{weight:.9,category:"Agile",keywords:["retrospective","retrospectives","retrospektiva","team improvement","continuous improvement"]},
+  "Communication":{weight:1.3,category:"People",keywords:["communication","communication skills","komunikace","presentation","reporting","status report","alignment"]},
+  "Leadership":{weight:1.15,category:"People",keywords:["leadership","team leadership","vedení týmu","people management","mentoring","ownership"]},
+  "Problem solving":{weight:1.1,category:"Thinking",keywords:["problem solving","solving problems","root cause","critical thinking","analytical","řešení problémů"]},
+  "Data-driven decisions":{weight:1,category:"Business",keywords:["data-driven","data driven","data analysis","metrics","kpi","power bi","excel","práce s daty"]}
 };
 
 function normalizeText(text){
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 }
 
-function keywordExists(jobText,skill){
+function findKeywordMatches(jobText,skill){
   const normalizedJobText=normalizeText(jobText);
-  return (JOB_KEYWORDS[skill]||[skill]).some(keyword=>normalizedJobText.includes(normalizeText(keyword)));
+  const model=JOB_SKILL_MODEL[skill]||{keywords:[skill]};
+  return model.keywords.filter(keyword=>normalizedJobText.includes(normalizeText(keyword)));
 }
 
 function scoreSkill(levelIndex){
@@ -58,25 +59,56 @@ function trafficLightFromScore(score){
 }
 
 function analyzeRoleMatch(selectedSkills,jobText){
-  const requiredSkills=selectedSkills.filter(item=>keywordExists(jobText,item.skill));
-  const skillsToEvaluate=requiredSkills.length>0?requiredSkills:selectedSkills.slice(0,12);
-  const matchScore=Math.round(skillsToEvaluate.reduce((sum,item)=>sum+scoreSkill(item.levelIndex),0)/skillsToEvaluate.length);
+  const evaluatedSkills=selectedSkills.map((item)=>{
+    const model=JOB_SKILL_MODEL[item.skill]||{weight:1,category:"General",keywords:[item.skill]};
+    const keywordMatches=findKeywordMatches(jobText,item.skill);
+    const detected=keywordMatches.length>0;
+    const evidenceBoost=Math.min(keywordMatches.length-1,2)*.08;
+    const weight=detected?model.weight+evidenceBoost:model.weight*.35;
+    const readinessScore=scoreSkill(item.levelIndex);
+    const contribution=readinessScore*weight;
+
+    return {...item,category:model.category,detected,keywordMatches,weight,readinessScore,contribution};
+  });
+
+  const detectedSkills=evaluatedSkills.filter(item=>item.detected);
+  const skillsToEvaluate=detectedSkills.length>0?detectedSkills:evaluatedSkills;
+  const totalWeight=skillsToEvaluate.reduce((sum,item)=>sum+item.weight,0);
+  const weightedScore=skillsToEvaluate.reduce((sum,item)=>sum+item.contribution,0)/totalWeight;
+  const coverageScore=Math.round((detectedSkills.length/selectedSkills.length)*100);
+  const confidence=Math.min(100,Math.round((detectedSkills.length/6)*100));
+  const matchScore=Math.round(weightedScore*.82+coverageScore*.18);
   const matchedSkills=skillsToEvaluate.filter(item=>item.levelIndex>=3).map(item=>`${item.skill} — ${item.level}`);
   const missingSkills=skillsToEvaluate.filter(item=>item.levelIndex<3).map(item=>`${item.skill} — ${item.level}`);
+  const criticalGaps=skillsToEvaluate.filter(item=>item.detected&&item.weight>=1.1&&item.levelIndex<3).map(item=>item.skill);
+  const roleSignals=detectedSkills
+    .sort((a,b)=>b.weight-a.weight)
+    .slice(0,6)
+    .map(item=>({skill:item.skill,category:item.category,keywords:item.keywordMatches.slice(0,3),weight:item.weight.toFixed(2)}));
+  const scoreBreakdown=[
+    `Weighted skill readiness: ${Math.round(weightedScore)}%`,
+    `Job requirement coverage: ${coverageScore}%`,
+    `Detected role signals: ${detectedSkills.length}/${selectedSkills.length}`,
+    `Confidence: ${confidence}%`
+  ];
   const cvRecommendations=[];
 
-  if(missingSkills.length>0)cvRecommendations.push("Focus first on skills that appear in the job description but are rated below intermediate in your profile.");
+  if(criticalGaps.length>0)cvRecommendations.push(`Start with the strongest gaps for this role: ${criticalGaps.slice(0,3).join(", ")}.`);
+  else if(missingSkills.length>0)cvRecommendations.push("Focus first on skills that appear in the job description but are rated below intermediate in your profile.");
   if(matchedSkills.length>0)cvRecommendations.push("Use your strongest matching skills in your CV and cover letter with wording similar to the job description.");
   cvRecommendations.push("Add evidence to your CV: a project example, measurable result, tool used, team size, deadline, budget or business impact.");
-  if(requiredSkills.length===0)cvRecommendations.push("The system did not detect many known skills in the pasted job text. Paste the full role description for a better result.");
+  if(detectedSkills.length===0)cvRecommendations.push("The system did not detect many known skills in the pasted job text. Paste the full role description for a better result.");
 
   return {
     matchScore,
     trafficLight:trafficLightFromScore(matchScore),
     matchedSkills,
     missingSkills,
+    criticalGaps,
+    roleSignals,
+    scoreBreakdown,
     cvRecommendations,
-    summary:requiredSkills.length>0?`The system detected ${requiredSkills.length} relevant skills in the pasted job description and compared them with your questionnaire answers.`:"The system did not detect clear known skills in the pasted job description, so it used your filled skill profile as an orientation estimate. Paste a fuller job description for better accuracy."
+    summary:detectedSkills.length>0?`The system detected ${detectedSkills.length} role requirements in the pasted job description. The match combines weighted skill readiness with how many of the role signals were found.`:"The system did not detect clear known skills in the pasted job description, so it used your filled skill profile as an orientation estimate. Paste a fuller job description for better accuracy."
   };
 }
 
@@ -220,12 +252,27 @@ export default function Home(){
               {analysis&&<div className="analysisResult" aria-live="polite">
                 <div className="analysisTop"><span>{analysis.trafficLight}</span><strong>{analysis.matchScore}%</strong></div>
                 <p>{analysis.summary}</p>
+                <div className="scoreLogic">
+                  <div>
+                    <h4>How the match is scored</h4>
+                    <ul>{analysis.scoreBreakdown.map(item=><li key={item}>{item}</li>)}</ul>
+                  </div>
+                  <div>
+                    <h4>Detected role signals</h4>
+                    {analysis.roleSignals.length?<div className="signalList">{analysis.roleSignals.map(item=><span key={item.skill}>{item.skill}<small>{item.category} · weight {item.weight}</small></span>)}</div>:<p>No clear role signals detected.</p>}
+                  </div>
+                </div>
                 <div className="analysisColumns">
                   <div><h4>Matching skills</h4>{analysis.matchedSkills.length?<ul>{analysis.matchedSkills.map(item=><li key={item}>{item}</li>)}</ul>:<p>No strong matching skills detected yet.</p>}</div>
                   <div><h4>Gaps to improve</h4>{analysis.missingSkills.length?<ul>{analysis.missingSkills.map(item=><li key={item}>{item}</li>)}</ul>:<p>No major gaps detected in the matched skill set.</p>}</div>
                 </div>
                 <h4>CV focus</h4>
                 <ul>{analysis.cvRecommendations.map(item=><li key={item}>{item}</li>)}</ul>
+                <div className="founderInline">
+                  <strong>Want the full match?</strong>
+                  <span>The founder licence unlocks the full 50-question assessment, deeper role matching and a complete growth plan.</span>
+                  <a className="button lime" href="/profile?checkout=developer">Unlock founder licence</a>
+                </div>
               </div>}
             </form>
           </div>}

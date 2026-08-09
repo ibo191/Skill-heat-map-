@@ -14,6 +14,8 @@ import {
 } from "../skillsData";
 import { PRODUCT } from "../productConfig";
 
+const PREVIEW_QUESTION_LIMIT = 12;
+
 export default function ProfilePage() {
   const [currentUserEmail, setCurrentUserEmail] = useState("");
   const [answers, setAnswers] = useState(createInitialAnswers());
@@ -35,17 +37,19 @@ export default function ProfilePage() {
     return getUsers()[currentUserEmail] || null;
   }, [currentUserEmail, analyses]);
 
+  const visibleQuestions = useMemo(() => QUESTIONS.slice(0, PREVIEW_QUESTION_LIMIT), []);
+
   const answeredCount = useMemo(() => {
-    return Object.values(answers).filter((value) => value > 0).length;
-  }, [answers]);
+    return visibleQuestions.filter((question) => answers[question.skill] > 0).length;
+  }, [answers, visibleQuestions]);
 
   const groupedQuestions = useMemo(() => {
-    return QUESTIONS.reduce((acc, question) => {
+    return visibleQuestions.reduce((acc, question) => {
       if (!acc[question.group]) acc[question.group] = [];
       acc[question.group].push(question);
       return acc;
     }, {});
-  }, []);
+  }, [visibleQuestions]);
 
   useEffect(() => {
     const users = getUsers();
@@ -315,30 +319,30 @@ export default function ProfilePage() {
             <div className="badge">Dashboard</div>
             <h1>{currentUser?.name || "Dashboard"}</h1>
             <p>
-              Manage your account, edit your saved skills and review saved job comparisons.
+              Manage your account, edit your preview skills and review saved job comparisons.
             </p>
           </div>
 
           <div className="profileStats">
             <strong>{answeredCount}</strong>
-            <span>rated skills</span>
+            <span>preview skills</span>
           </div>
         </section>
 
-        {checkoutIntent && (
-          <section className="checkoutPanel">
-            <div>
-              <div className="badge darkBadge">Developer badge</div>
-              <h2>Registration is ready</h2>
-              <p>
-                Your local dashboard is created. Continue to checkout to reserve founder access and the developer badge.
-              </p>
-            </div>
-            <a className="checkoutButton" href={PRODUCT.preorderUrl} target="_blank" rel="noreferrer">
-              Continue to checkout
-            </a>
-          </section>
-        )}
+        <section className="checkoutPanel">
+          <div>
+            <div className="badge darkBadge">{checkoutIntent ? "Developer badge" : "Founder licence"}</div>
+            <h2>{checkoutIntent ? "Registration is ready" : "Unlock the full assessment"}</h2>
+            <p>
+              {checkoutIntent
+                ? "Your local dashboard is created. Continue to checkout to reserve founder access, the developer badge and the full 50-question assessment."
+                : "This dashboard is a local preview. The founder licence unlocks the full 50-question assessment, deeper matching and a complete growth plan."}
+            </p>
+          </div>
+          <a className="checkoutButton" href={PRODUCT.preorderUrl} target="_blank" rel="noreferrer">
+            {checkoutIntent ? "Continue to checkout" : "Get founder licence"}
+          </a>
+        </section>
 
         <section className="gridTwo">
           <div className="card">
@@ -393,7 +397,7 @@ export default function ProfilePage() {
             <div>
               <h2>Skill overview</h2>
               <p>
-                These are all saved skills from your profile. You can edit them here directly.
+                These are the {PREVIEW_QUESTION_LIMIT} preview skills saved locally in this browser. Founder access unlocks the full 50-question profile.
               </p>
             </div>
 

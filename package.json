@@ -5,7 +5,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "latest",
+    "next": "15.5.23",
     "react": "latest",
     "react-dom": "latest",
     "openai": "latest",
